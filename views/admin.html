@@ -1,0 +1,1987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - NULEX</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .admin-header {
+            background: linear-gradient(135deg, var(--dark-blue) 0%, #1e3a8a 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+        
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card-admin {
+            background: var(--white);
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary-blue);
+        }
+        
+        .stat-card-admin.warning { border-left-color: var(--warning); }
+        .stat-card-admin.success { border-left-color: var(--success); }
+        .stat-card-admin.danger { border-left-color: var(--danger); }
+        
+        .stat-icon-admin {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-blue);
+        }
+        
+        .stat-value-admin {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--dark-blue);
+            margin-bottom: 0.5rem;
+        }
+        
+        .admin-tabs {
+            display: flex;
+            border-bottom: 2px solid #e5e7eb;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .admin-tab {
+            padding: 1rem 2rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-weight: 600;
+            color: var(--gray);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .admin-tab.active {
+            color: var(--primary-blue);
+            border-bottom-color: var(--primary-blue);
+        }
+        
+        .admin-tab-content {
+            display: none;
+        }
+        
+        .admin-tab-content.active {
+            display: block;
+        }
+        
+        .admin-card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+        
+        .search-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .data-table th {
+            background: var(--gray-light);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--gray-dark);
+            position: sticky;
+            top: 0;
+        }
+        
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .data-table tr:hover {
+            background: var(--light-blue);
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-blue);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .status-badge-admin {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .badge-active { background: #d1fae5; color: #065f46; }
+        .badge-blocked { background: #fee2e2; color: #991b1b; }
+        .badge-pending { background: #fef3c7; color: #92400e; }
+        .badge-admin { background: #dbeafe; color: #1e40af; }
+        .badge-knight { background: #e0e7ff; color: #3730a3; }
+        .badge-elite { background: #fef3c7; color: #92400e; }
+        
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        }
+        
+        .btn-icon.view { background: #dbeafe; color: #1e40af; }
+        .btn-icon.edit { background: #fef3c7; color: #92400e; }
+        .btn-icon.delete { background: #fee2e2; color: #991b1b; }
+        .btn-icon.approve { background: #d1fae5; color: #065f46; }
+        .btn-icon.reject { background: #fee2e2; color: #991b1b; }
+        
+        .btn-icon:hover {
+            transform: translateY(-2px);
+        }
+        
+        .pagination-admin {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+        
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .modal-body {
+            padding: 2rem;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .file-upload {
+            border: 2px dashed #e5e7eb;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            margin: 1rem 0;
+        }
+        
+        .file-upload:hover {
+            border-color: var(--primary-blue);
+            background: var(--light-blue);
+        }
+        
+        .preview-image {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+        
+        .withdrawal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .system-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .control-card {
+            background: var(--white);
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid #e5e7eb;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            margin-top: 1rem;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: var(--success);
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+        
+        .log-entry {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        
+        .log-entry.info { background: #dbeafe; }
+        .log-entry.warning { background: #fef3c7; }
+        .log-entry.error { background: #fee2e2; }
+        
+        .export-options {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .admin-tabs {
+                flex-direction: column;
+            }
+            
+            .search-bar {
+                flex-direction: column;
+            }
+            
+            .data-table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo-container">
+            <img src="https://i.ibb.co/B9d2bfd/6-F10-C074-AF1-B-489-E-B18-F-FD5-FF1-C8-C402.jpg" alt="NULEX Logo" class="logo">
+            <h1 class="site-name">NULEX ADMIN</h1>
+        </div>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="text-align: right;">
+                <div style="font-weight: 600; color: var(--dark-blue);" id="adminWelcome">Welcome, Admin</div>
+                <div style="font-size: 0.9rem; color: var(--gray);" id="lastLogin">Last login: Today, 09:30 AM</div>
+            </div>
+            <button onclick="logout()" class="btn btn-danger">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Admin Header -->
+        <div class="admin-header">
+            <h1 style="margin-bottom: 0.5rem;"><i class="fas fa-crown"></i> Admin Control Panel</h1>
+            <p>Manage users, withdrawals, tasks, and system settings</p>
+        </div>
+
+        <!-- Admin Stats -->
+        <div class="admin-stats">
+            <div class="stat-card-admin">
+                <div class="stat-icon-admin">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-value-admin" id="totalUsers">0</div>
+                <div class="stat-label">Total Users</div>
+                <div style="font-size: 0.9rem; color: var(--gray); margin-top: 0.5rem;">
+                    <span id="activeUsers">0 active</span> • 
+                    <span id="newToday">0 new today</span>
+                </div>
+            </div>
+            
+            <div class="stat-card-admin warning">
+                <div class="stat-icon-admin">
+                    <i class="fas fa-money-bill-wave"></i>
+                </div>
+                <div class="stat-value-admin" id="pendingWithdrawals">0</div>
+                <div class="stat-label">Pending Withdrawals</div>
+                <div style="font-size: 0.9rem; color: var(--gray); margin-top: 0.5rem;">
+                    Total: ₦<span id="pendingAmount">0</span>
+                </div>
+            </div>
+            
+            <div class="stat-card-admin success">
+                <div class="stat-icon-admin">
+                    <i class="fas fa-tasks"></i>
+                </div>
+                <div class="stat-value-admin" id="totalTasks">0</div>
+                <div class="stat-label">Active Tasks</div>
+                <div style="font-size: 0.9rem; color: var(--gray); margin-top: 0.5rem;">
+                    <span id="taskCompletions">0 completions today</span>
+                </div>
+            </div>
+            
+            <div class="stat-card-admin danger">
+                <div class="stat-icon-admin">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-value-admin" id="totalRevenue">₦0</div>
+                <div class="stat-label">Total Revenue</div>
+                <div style="font-size: 0.9rem; color: var(--gray); margin-top: 0.5rem;">
+                    Today: ₦<span id="todayRevenue">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Tabs -->
+        <div class="admin-tabs">
+            <div class="admin-tab active" onclick="switchAdminTab('dashboard')">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </div>
+            <div class="admin-tab" onclick="switchAdminTab('users')">
+                <i class="fas fa-users"></i> Users
+            </div>
+            <div class="admin-tab" onclick="switchAdminTab('withdrawals')">
+                <i class="fas fa-wallet"></i> Withdrawals
+            </div>
+            <div class="admin-tab" onclick="switchAdminTab('tasks')">
+                <i class="fas fa-tasks"></i> Tasks
+            </div>
+            <div class="admin-tab" onclick="switchAdminTab('packages')">
+                <i class="fas fa-box"></i> Packages
+            </div>
+            <div class="admin-tab" onclick="switchAdminTab('settings')">
+                <i class="fas fa-cog"></i> Settings
+            </div>
+            <div class="admin-tab" onclick="switchAdminTab('logs')">
+                <i class="fas fa-clipboard-list"></i> System Logs
+            </div>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboardTab" class="admin-tab-content active">
+            <div class="admin-card">
+                <h2><i class="fas fa-chart-bar"></i> Platform Overview</h2>
+                <p>Quick actions and recent activities</p>
+                
+                <div class="system-controls">
+                    <div class="control-card">
+                        <h4><i class="fas fa-door-open"></i> Withdrawal Portal</h4>
+                        <p>Control when users can submit withdrawal requests</p>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="portalToggle" onchange="toggleWithdrawalPortal()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <div style="margin-top: 1rem;">
+                            <small id="portalStatusText">Portal is currently CLOSED</small>
+                        </div>
+                    </div>
+                    
+                    <div class="control-card">
+                        <h4><i class="fas fa-user-plus"></i> User Registration</h4>
+                        <p>Allow or block new user registrations</p>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="registrationToggle" checked onchange="toggleRegistration()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <div style="margin-top: 1rem;">
+                            <small>New users can currently register</small>
+                        </div>
+                    </div>
+                    
+                    <div class="control-card">
+                        <h4><i class="fas fa-tasks"></i> Task System</h4>
+                        <p>Enable or disable task completions</p>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="tasksToggle" checked onchange="toggleTaskSystem()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <div style="margin-top: 1rem;">
+                            <small>Task system is currently ACTIVE</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Activities -->
+                <div style="margin-top: 2rem;">
+                    <h3><i class="fas fa-history"></i> Recent Activities</h3>
+                    <div id="recentActivities">
+                        <!-- Filled by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Tab -->
+        <div id="usersTab" class="admin-tab-content">
+            <div class="admin-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <div>
+                        <h2><i class="fas fa-users"></i> User Management</h2>
+                        <p>View and manage all platform users</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="exportUsers()">
+                        <i class="fas fa-download"></i> Export Users
+                    </button>
+                </div>
+                
+                <div class="search-bar">
+                    <input type="text" class="search-input" placeholder="Search users by name, email, or username..." 
+                           oninput="searchUsers(this.value)">
+                    <select class="form-input" style="max-width: 200px;" onchange="filterUsers(this.value)">
+                        <option value="all">All Users</option>
+                        <option value="active">Active Only</option>
+                        <option value="blocked">Blocked</option>
+                        <option value="knight">Knight Package</option>
+                        <option value="elite">Elite Package</option>
+                        <option value="no-package">No Package</option>
+                    </select>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Package</th>
+                                <th>Balances</th>
+                                <th>Status</th>
+                                <th>Joined</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <!-- Filled by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="pagination-admin" id="usersPagination">
+                    <!-- Filled by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Withdrawals Tab -->
+        <div id="withdrawalsTab" class="admin-tab-content">
+            <div class="admin-card">
+                <h2><i class="fas fa-wallet"></i> Withdrawal Management</h2>
+                <p>Approve or reject user withdrawal requests</p>
+                
+                <div class="search-bar">
+                    <input type="text" class="search-input" placeholder="Search by reference or username..." 
+                           oninput="searchWithdrawals(this.value)">
+                    <select class="form-input" style="max-width: 200px;" onchange="filterWithdrawals(this.value)">
+                        <option value="all">All Withdrawals</option>
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                        <option value="paid">Paid</option>
+                    </select>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Reference</th>
+                                <th>User</th>
+                                <th>Amount</th>
+                                <th>Type</th>
+                                <th>Bank Details</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="withdrawalsTableBody">
+                            <!-- Filled by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="pagination-admin" id="withdrawalsPagination">
+                    <!-- Filled by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Tasks Tab -->
+        <div id="tasksTab" class="admin-tab-content">
+            <div class="admin-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <div>
+                        <h2><i class="fas fa-tasks"></i> Task Management</h2>
+                        <p>Create and manage tasks for users</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="showAddTaskModal()">
+                        <i class="fas fa-plus"></i> Add New Task
+                    </button>
+                </div>
+                
+                <div class="search-bar">
+                    <input type="text" class="search-input" placeholder="Search tasks..." 
+                           oninput="searchTasks(this.value)">
+                    <select class="form-input" style="max-width: 200px;" onchange="filterTasks(this.value)">
+                        <option value="all">All Tasks</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="video">Video Tasks</option>
+                        <option value="app">App Tasks</option>
+                        <option value="survey">Surveys</option>
+                    </select>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Task Title</th>
+                                <th>Type</th>
+                                <th>Reward</th>
+                                <th>Completions</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tasksTableBody">
+                            <!-- Filled by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="pagination-admin" id="tasksPagination">
+                    <!-- Filled by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Packages Tab -->
+        <div id="packagesTab" class="admin-tab-content">
+            <div class="admin-card">
+                <h2><i class="fas fa-box"></i> Package Management</h2>
+                <p>Manage package purchases and verifications</p>
+                
+                <div class="search-bar">
+                    <input type="text" class="search-input" placeholder="Search by username or reference..." 
+                           oninput="searchPackages(this.value)">
+                    <select class="form-input" style="max-width: 200px;" onchange="filterPackages(this.value)">
+                        <option value="all">All Packages</option>
+                        <option value="pending">Pending Payment</option>
+                        <option value="verified">Verified</option>
+                        <option value="knight">Knight Package</option>
+                        <option value="elite">Elite Package</option>
+                    </select>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Package</th>
+                                <th>Amount</th>
+                                <th>Payment Method</th>
+                                <th>Reference</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="packagesTableBody">
+                            <!-- Filled by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="pagination-admin" id="packagesPagination">
+                    <!-- Filled by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settingsTab" class="admin-tab-content">
+            <div class="admin-card">
+                <h2><i class="fas fa-cog"></i> System Settings</h2>
+                <p>Configure platform parameters and preferences</p>
+                
+                <div class="system-controls">
+                    <!-- Commission Settings -->
+                    <div class="control-card">
+                        <h4><i class="fas fa-percentage"></i> Commission Settings</h4>
+                        <div class="form-group">
+                            <label class="form-label">Knight Package Commission</label>
+                            <input type="number" class="form-input" value="1500" id="knightCommission">
+                            <small class="text-muted">Amount earned for Knight referrals</small>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Elite Package Commission</label>
+                            <input type="number" class="form-input" value="3500" id="eliteCommission">
+                            <small class="text-muted">Amount earned for Elite referrals</small>
+                        </div>
+                        <button class="btn btn-primary" onclick="updateCommissionSettings()">
+                            <i class="fas fa-save"></i> Update Commissions
+                        </button>
+                    </div>
+                    
+                    <!-- Withdrawal Settings -->
+                    <div class="control-card">
+                        <h4><i class="fas fa-money-bill-wave"></i> Withdrawal Settings</h4>
+                        <div class="form-group">
+                            <label class="form-label">Affiliate Min Withdrawal</label>
+                            <div style="position: relative;">
+                                <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%);">₦</span>
+                                <input type="number" class="form-input" value="1000" id="affiliateMin" style="padding-left: 30px;">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Task Min Withdrawal</label>
+                            <div style="position: relative;">
+                                <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%);">₦</span>
+                                <input type="number" class="form-input" value="15000" id="taskMin" style="padding-left: 30px;">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Withdrawal Processing Fee (%)</label>
+                            <input type="number" class="form-input" value="1.5" step="0.1" id="withdrawalFee">
+                        </div>
+                        <button class="btn btn-primary" onclick="updateWithdrawalSettings()">
+                            <i class="fas fa-save"></i> Update Withdrawal Settings
+                        </button>
+                    </div>
+                    
+                    <!-- Package Settings -->
+                    <div class="control-card">
+                        <h4><i class="fas fa-box"></i> Package Settings</h4>
+                        <div class="form-group">
+                            <label class="form-label">Knight Package Price</label>
+                            <div style="position: relative;">
+                                <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%);">₦</span>
+                                <input type="number" class="form-input" value="4500" id="knightPrice" style="padding-left: 30px;">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Elite Package Price</label>
+                            <div style="position: relative;">
+                                <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%);">₦</span>
+                                <input type="number" class="form-input" value="7500" id="elitePrice" style="padding-left: 30px;">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Welcome Bonus Amount</label>
+                            <div style="position: relative;">
+                                <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%);">₦</span>
+                                <input type="number" class="form-input" value="1000" id="welcomeBonus" style="padding-left: 30px;">
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="updatePackageSettings()">
+                            <i class="fas fa-save"></i> Update Package Settings
+                        </button>
+                    </div>
+                    
+                    <!-- Korapay Settings -->
+                    <div class="control-card">
+                        <h4><i class="fas fa-credit-card"></i> Payment Gateway</h4>
+                        <div class="form-group">
+                            <label class="form-label">Korapay Secret Key</label>
+                            <input type="password" class="form-input" value="sk_test_********" id="korapaySecret">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Korapay Public Key</label>
+                            <input type="text" class="form-input" value="pk_test_********" id="korapayPublic">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Webhook URL</label>
+                            <input type="text" class="form-input" readonly value="https://nulex.com/api/payment/webhook" id="webhookUrl">
+                            <button class="btn btn-secondary btn-sm mt-1" onclick="copyWebhookUrl()">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <button class="btn btn-primary" onclick="updatePaymentSettings()">
+                            <i class="fas fa-save"></i> Update Payment Settings
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Danger Zone -->
+                <div class="control-card" style="margin-top: 2rem; border: 2px solid var(--danger);">
+                    <h4 style="color: var(--danger);"><i class="fas fa-exclamation-triangle"></i> Danger Zone</h4>
+                    <p>Irreversible actions. Proceed with caution.</p>
+                    
+                    <div class="form-group">
+                        <button class="btn btn-danger" onclick="showClearCacheModal()">
+                            <i class="fas fa-trash"></i> Clear System Cache
+                        </button>
+                        <small class="text-muted">Clear all cached data (does not affect database)</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button class="btn btn-danger" onclick="showResetSystemModal()">
+                            <i class="fas fa-redo"></i> Reset Test Data
+                        </button>
+                        <small class="text-muted">Reset all test data (only in development)</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button class="btn btn-danger" onclick="showBackupModal()">
+                            <i class="fas fa-database"></i> Backup Database
+                        </button>
+                        <small class="text-muted">Create a full database backup</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logs Tab -->
+        <div id="logsTab" class="admin-tab-content">
+            <div class="admin-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <div>
+                        <h2><i class="fas fa-clipboard-list"></i> System Logs</h2>
+                        <p>Monitor system activities and errors</p>
+                    </div>
+                    <div class="export-options">
+                        <button class="btn btn-secondary" onclick="clearLogs()">
+                            <i class="fas fa-trash"></i> Clear Logs
+                        </button>
+                        <button class="btn btn-primary" onclick="exportLogs()">
+                            <i class="fas fa-download"></i> Export Logs
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="search-bar">
+                    <input type="text" class="search-input" placeholder="Search logs..." 
+                           oninput="searchLogs(this.value)">
+                    <select class="form-input" style="max-width: 200px;" onchange="filterLogs(this.value)">
+                        <option value="all">All Logs</option>
+                        <option value="info">Info</option>
+                        <option value="warning">Warnings</option>
+                        <option value="error">Errors</option>
+                        <option value="user">User Actions</option>
+                        <option value="payment">Payments</option>
+                    </select>
+                </div>
+                
+                <div id="logsContainer" style="max-height: 500px; overflow-y: auto; margin-top: 1rem; border: 1px solid #e5e7eb; border-radius: 8px;">
+                    <!-- Logs will be loaded here -->
+                </div>
+                
+                <div class="pagination-admin" id="logsPagination" style="margin-top: 1rem;">
+                    <!-- Filled by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Modals -->
+        
+        <!-- Add Task Modal -->
+        <div id="addTaskModal" class="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 style="margin: 0;"><i class="fas fa-plus"></i> Add New Task</h2>
+                    <button onclick="closeModal('addTaskModal')" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">
+                        &times;
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="addTaskForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Task Title *</label>
+                                <input type="text" class="form-input" required id="taskTitle">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Task Type *</label>
+                                <select class="form-input" required id="taskType">
+                                    <option value="video">Video Task</option>
+                                    <option value="app">App Task</option>
+                                    <option value="survey">Survey</option>
+                                    <option value="social">Social Media</option>
+                                    <option value="website">Website Visit</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Description *</label>
+                            <textarea class="form-input" rows="3" required id="taskDescription"></textarea>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Reward Amount (₦) *</label>
+                                <input type="number" class="form-input" required id="taskReward" min="100" step="100">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Duration (minutes) *</label>
+                                <input type="number" class="form-input" required id="taskDuration" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Max Completions</label>
+                                <input type="number" class="form-input" id="taskMaxCompletions" min="1" value="1000">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Task URL (if applicable)</label>
+                            <input type="url" class="form-input" id="taskUrl" placeholder="https://">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Completion Steps (one per line) *</label>
+                            <textarea class="form-input" rows="4" required id="taskSteps" placeholder="Step 1: Visit the website
+Step 2: Watch the video
+Step 3: Take screenshot"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Verification Requirements</label>
+                            <div style="margin-top: 0.5rem;">
+                                <label style="display: block; margin-bottom: 0.5rem;">
+                                    <input type="checkbox" id="requiresScreenshot"> Requires Screenshot
+                                </label>
+                                <label style="display: block;">
+                                    <input type="checkbox" id="requiresQuestion"> Requires Verification Question
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group" id="questionField" style="display: none;">
+                            <label class="form-label">Verification Question</label>
+                            <input type="text" class="form-input" id="taskQuestion" placeholder="What color was the button?">
+                        </div>
+                        
+                        <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                            <button type="submit" class="btn btn-success" style="flex: 1;">
+                                <i class="fas fa-save"></i> Create Task
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('addTaskModal')">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Details Modal -->
+        <div id="userDetailsModal" class="modal-overlay">
+            <div class="modal-content">
+                <!-- Content will be loaded by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Withdrawal Details Modal -->
+        <div id="withdrawalDetailsModal" class="modal-overlay">
+            <div class="modal-content">
+                <!-- Content will be loaded by JavaScript -->
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 NULEX Platform. Admin Panel v1.0</p>
+        <p>Last updated: <span id="currentDateTime"></span></p>
+    </footer>
+
+    <script src="/js/main.js"></script>
+    <script>
+        // Global variables
+        let currentAdminTab = 'dashboard';
+        let usersData = [];
+        let withdrawalsData = [];
+        let tasksData = [];
+        let packagesData = [];
+        let logsData = [];
+        let currentPage = {
+            users: 1,
+            withdrawals: 1,
+            tasks: 1,
+            packages: 1,
+            logs: 1
+        };
+        const itemsPerPage = 10;
+        
+        // Initialize admin panel
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is admin
+            const user = JSON.parse(localStorage.getItem('nulex_user') || '{}');
+            if (!user.isAdmin) {
+                window.location.href = '/dashboard';
+                return;
+            }
+            
+            // Update date time
+            updateDateTime();
+            setInterval(updateDateTime, 60000); // Update every minute
+            
+            // Load admin data
+            loadAdminStats();
+            loadUsers();
+            loadWithdrawals();
+            loadTasks();
+            loadPackages();
+            loadLogs();
+            loadRecentActivities();
+            
+            // Setup event listeners
+            setupAdminEventListeners();
+        });
+        
+        function updateDateTime() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            document.getElementById('currentDateTime').textContent = 
+                now.toLocaleDateString('en-US', options);
+        }
+        
+        function switchAdminTab(tabName) {
+            currentAdminTab = tabName;
+            
+            // Update tabs
+            document.querySelectorAll('.admin-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.admin-tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Activate selected tab
+            document.querySelector(`[onclick="switchAdminTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(`${tabName}Tab`).classList.add('active');
+            
+            // Load data for specific tabs if needed
+            if (tabName === 'dashboard') {
+                loadAdminStats();
+                loadRecentActivities();
+            }
+        }
+        
+        async function loadAdminStats() {
+            try {
+                // In real app, this would be API calls
+                // Mock data
+                document.getElementById('totalUsers').textContent = '1,247';
+                document.getElementById('activeUsers').textContent = '892 active';
+                document.getElementById('newToday').textContent = '23 new today';
+                
+                document.getElementById('pendingWithdrawals').textContent = '17';
+                document.getElementById('pendingAmount').textContent = '84,500';
+                
+                document.getElementById('totalTasks').textContent = '48';
+                document.getElementById('taskCompletions').textContent = '312 completions today';
+                
+                document.getElementById('totalRevenue').textContent = '₦2,847,500';
+                document.getElementById('todayRevenue').textContent = '45,200';
+                
+            } catch (error) {
+                console.error('Error loading admin stats:', error);
+            }
+        }
+        
+        async function loadUsers() {
+            try {
+                // In real app, this would be an API call
+                // Mock users data
+                usersData = [
+                    { id: 1, username: 'john_doe', email: 'john@email.com', package: 'elite', affiliateBalance: 23500, taskBalance: 12500, status: 'active', joined: '2024-01-15' },
+                    { id: 2, username: 'jane_smith', email: 'jane@email.com', package: 'knight', affiliateBalance: 16500, taskBalance: 8500, status: 'active', joined: '2024-01-14' },
+                    { id: 3, username: 'mike_jones', email: 'mike@email.com', package: 'knight', affiliateBalance: 12000, taskBalance: 0, status: 'active', joined: '2024-01-13' },
+                    { id: 4, username: 'sara_wilson', email: 'sara@email.com', package: 'elite', affiliateBalance: 35000, taskBalance: 22000, status: 'active', joined: '2024-01-12' },
+                    { id: 5, username: 'brown_chris', email: 'chris@email.com', package: 'none', affiliateBalance: 0, taskBalance: 0, status: 'blocked', joined: '2024-01-11' },
+                    { id: 6, username: 'admin_user', email: 'admin@nulex.com', package: 'elite', affiliateBalance: 0, taskBalance: 0, status: 'admin', joined: '2024-01-01' },
+                    // Add more mock users as needed
+                ];
+                
+                displayUsers();
+                
+            } catch (error) {
+                console.error('Error loading users:', error);
+                showAlert('Failed to load users', 'danger');
+            }
+        }
+        
+        function displayUsers(filteredUsers = usersData) {
+            const startIndex = (currentPage.users - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
+            const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+            
+            // Render users table
+            const usersHtml = paginatedUsers.map(user => {
+                const initials = user.username.substring(0, 2).toUpperCase();
+                const packageBadge = user.package === 'elite' ? 'badge-elite' : 
+                                   user.package === 'knight' ? 'badge-knight' : 'badge-pending';
+                const packageText = user.package === 'elite' ? 'Elite' : 
+                                  user.package === 'knight' ? 'Knight' : 'No Package';
+                const statusBadge = user.status === 'active' ? 'badge-active' : 
+                                  user.status === 'blocked' ? 'badge-blocked' : 'badge-admin';
+                const statusText = user.status === 'active' ? 'Active' : 
+                                 user.status === 'blocked' ? 'Blocked' : 'Admin';
+                
+                return `
+                    <tr>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <div class="user-avatar">${initials}</div>
+                                <div>
+                                    <div style="font-weight: 600;">${user.username}</div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">${user.email}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="status-badge-admin ${packageBadge}">${packageText}</span>
+                        </td>
+                        <td>
+                            <div style="font-weight: 600;">₦${user.affiliateBalance.toLocaleString()}</div>
+                            <div style="font-size: 0.9rem; color: var(--gray);">Task: ₦${user.taskBalance.toLocaleString()}</div>
+                        </td>
+                        <td>
+                            <span class="status-badge-admin ${statusBadge}">${statusText}</span>
+                        </td>
+                        <td>${user.joined}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-icon view" onclick="viewUserDetails(${user.id})" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn-icon edit" onclick="editUser(${user.id})" title="Edit User">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                ${user.status !== 'admin' ? `
+                                    <button class="btn-icon ${user.status === 'active' ? 'delete' : 'approve'}" 
+                                            onclick="${user.status === 'active' ? 'blockUser' : 'unblockUser'}(${user.id})"
+                                            title="${user.status === 'active' ? 'Block User' : 'Unblock User'}">
+                                        <i class="fas fa-${user.status === 'active' ? 'ban' : 'check'}"></i>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            document.getElementById('usersTableBody').innerHTML = usersHtml || `
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 2rem; color: var(--gray);">
+                        No users found
+                    </td>
+                </tr>
+            `;
+            
+            // Render pagination
+            renderPagination('users', totalPages);
+        }
+        
+        function searchUsers(query) {
+            const filtered = usersData.filter(user => 
+                user.username.toLowerCase().includes(query.toLowerCase()) ||
+                user.email.toLowerCase().includes(query.toLowerCase())
+            );
+            currentPage.users = 1;
+            displayUsers(filtered);
+        }
+        
+        function filterUsers(filter) {
+            let filtered = usersData;
+            
+            switch(filter) {
+                case 'active':
+                    filtered = usersData.filter(u => u.status === 'active');
+                    break;
+                case 'blocked':
+                    filtered = usersData.filter(u => u.status === 'blocked');
+                    break;
+                case 'knight':
+                    filtered = usersData.filter(u => u.package === 'knight');
+                    break;
+                case 'elite':
+                    filtered = usersData.filter(u => u.package === 'elite');
+                    break;
+                case 'no-package':
+                    filtered = usersData.filter(u => u.package === 'none');
+                    break;
+            }
+            
+            currentPage.users = 1;
+            displayUsers(filtered);
+        }
+        
+        async function loadWithdrawals() {
+            try {
+                // Mock withdrawals data
+                withdrawalsData = [
+                    { id: 1, reference: 'WD-2024-001', username: 'john_doe', amount: 5000, type: 'affiliate', 
+                      bankName: 'Zenith Bank', accountNumber: '1234567890', status: 'pending', date: '2024-01-15' },
+                    { id: 2, reference: 'WD-2024-002', username: 'jane_smith', amount: 8000, type: 'task', 
+                      bankName: 'GT Bank', accountNumber: '0987654321', status: 'approved', date: '2024-01-14' },
+                    { id: 3, reference: 'WD-2024-003', username: 'mike_jones', amount: 3000, type: 'affiliate', 
+                      bankName: 'Access Bank', accountNumber: '1122334455', status: 'rejected', date: '2024-01-13' },
+                    { id: 4, reference: 'WD-2024-004', username: 'sara_wilson', amount: 10000, type: 'task', 
+                      bankName: 'UBA', accountNumber: '5566778899', status: 'paid', date: '2024-01-12' },
+                    // Add more mock withdrawals as needed
+                ];
+                
+                displayWithdrawals();
+                
+            } catch (error) {
+                console.error('Error loading withdrawals:', error);
+            }
+        }
+        
+        function displayWithdrawals(filteredWithdrawals = withdrawalsData) {
+            const startIndex = (currentPage.withdrawals - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedWithdrawals = filteredWithdrawals.slice(startIndex, endIndex);
+            const totalPages = Math.ceil(filteredWithdrawals.length / itemsPerPage);
+            
+            const withdrawalsHtml = paginatedWithdrawals.map(wd => {
+                const statusBadge = `badge-${wd.status}`;
+                const statusText = wd.status.charAt(0).toUpperCase() + wd.status.slice(1);
+                
+                return `
+                    <tr>
+                        <td><code>${wd.reference}</code></td>
+                        <td>@${wd.username}</td>
+                        <td><strong>₦${wd.amount.toLocaleString()}</strong></td>
+                        <td>${wd.type === 'affiliate' ? 'Affiliate' : 'Task'}</td>
+                        <td>
+                            <div style="font-size: 0.9rem;">
+                                <div>${wd.bankName}</div>
+                                <div style="color: var(--gray);">${wd.accountNumber}</div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="status-badge-admin ${statusBadge}">${statusText}</span>
+                        </td>
+                        <td>${wd.date}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-icon view" onclick="viewWithdrawalDetails(${wd.id})" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                ${wd.status === 'pending' ? `
+                                    <button class="btn-icon approve" onclick="approveWithdrawal(${wd.id})" title="Approve">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="btn-icon reject" onclick="rejectWithdrawal(${wd.id})" title="Reject">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                ` : ''}
+                                ${wd.status === 'approved' ? `
+                                    <button class="btn-icon approve" onclick="markAsPaid(${wd.id})" title="Mark as Paid">
+                                        <i class="fas fa-money-bill-wave"></i>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            document.getElementById('withdrawalsTableBody').innerHTML = withdrawalsHtml;
+            
+            renderPagination('withdrawals', totalPages);
+        }
+        
+        function searchWithdrawals(query) {
+            const filtered = withdrawalsData.filter(wd => 
+                wd.reference.toLowerCase().includes(query.toLowerCase()) ||
+                wd.username.toLowerCase().includes(query.toLowerCase())
+            );
+            currentPage.withdrawals = 1;
+            displayWithdrawals(filtered);
+        }
+        
+        function filterWithdrawals(filter) {
+            let filtered = withdrawalsData;
+            
+            if (filter !== 'all') {
+                filtered = withdrawalsData.filter(wd => wd.status === filter);
+            }
+            
+            currentPage.withdrawals = 1;
+            displayWithdrawals(filtered);
+        }
+        
+        async function loadTasks() {
+            try {
+                // Mock tasks data
+                tasksData = [
+                    { id: 1, title: 'Watch Product Review Video', type: 'video', reward: 500, completions: 842, maxCompletions: 1000, status: 'active', created: '2024-01-15' },
+                    { id: 2, title: 'Install Mobile App', type: 'app', reward: 1200, completions: 312, maxCompletions: 500, status: 'active', created: '2024-01-14' },
+                    { id: 3, title: 'Shopping Survey', type: 'survey', reward: 800, completions: 1542, maxCompletions: 2000, status: 'active', created: '2024-01-13' },
+                    { id: 4, title: 'Follow Instagram', type: 'social', reward: 300, completions: 4215, maxCompletions: 5000, status: 'active', created: '2024-01-12' },
+                    { id: 5, title: 'Website Visit', type: 'website', reward: 400, completions: 2310, maxCompletions: 3000, status: 'inactive', created: '2024-01-11' },
+                    // Add more mock tasks as needed
+                ];
+                
+                displayTasks();
+                
+            } catch (error) {
+                console.error('Error loading tasks:', error);
+            }
+        }
+        
+        function displayTasks(filteredTasks = tasksData) {
+            const startIndex = (currentPage.tasks - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedTasks = filteredTasks.slice(startIndex, endIndex);
+            const totalPages = Math.ceil(filteredTasks.length / itemsPerPage);
+            
+            const tasksHtml = paginatedTasks.map(task => {
+                const typeColors = {
+                    'video': 'info',
+                    'app': 'warning',
+                    'survey': 'success',
+                    'social': 'primary',
+                    'website': 'danger'
+                };
+                const statusBadge = task.status === 'active' ? 'badge-active' : 'badge-pending';
+                const statusText = task.status === 'active' ? 'Active' : 'Inactive';
+                const completionRate = Math.round((task.completions / task.maxCompletions) * 100);
+                
+                return `
+                    <tr>
+                        <td>
+                            <div style="font-weight: 600;">${task.title}</div>
+                            <div style="font-size: 0.9rem; color: var(--gray);">
+                                ${task.type.charAt(0).toUpperCase() + task.type.slice(1)} Task
+                            </div>
+                        </td>
+                        <td>
+                            <span class="status-badge-admin badge-${typeColors[task.type] || 'info'}">
+                                ${task.type.charAt(0).toUpperCase() + task.type.slice(1)}
+                            </span>
+                        </td>
+                        <td><strong>₦${task.reward.toLocaleString()}</strong></td>
+                        <td>
+                            <div>${task.completions.toLocaleString()}/${task.maxCompletions.toLocaleString()}</div>
+                            <div style="font-size: 0.8rem; color: var(--gray);">
+                                ${completionRate}% complete
+                            </div>
+                        </td>
+                        <td>
+                            <span class="status-badge-admin ${statusBadge}">${statusText}</span>
+                        </td>
+                        <td>${task.created}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-icon view" onclick="viewTaskDetails(${task.id})" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn-icon edit" onclick="editTask(${task.id})" title="Edit Task">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-icon ${task.status === 'active' ? 'delete' : 'approve'}" 
+                                        onclick="${task.status === 'active' ? 'deactivateTask' : 'activateTask'}(${task.id})"
+                                        title="${task.status === 'active' ? 'Deactivate' : 'Activate'}">
+                                    <i class="fas fa-${task.status === 'active' ? 'pause' : 'play'}"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            document.getElementById('tasksTableBody').innerHTML = tasksHtml;
+            
+            renderPagination('tasks', totalPages);
+        }
+        
+        function searchTasks(query) {
+            const filtered = tasksData.filter(task => 
+                task.title.toLowerCase().includes(query.toLowerCase())
+            );
+            currentPage.tasks = 1;
+            displayTasks(filtered);
+        }
+        
+        function filterTasks(filter) {
+            let filtered = tasksData;
+            
+            switch(filter) {
+                case 'active':
+                    filtered = tasksData.filter(t => t.status === 'active');
+                    break;
+                case 'inactive':
+                    filtered = tasksData.filter(t => t.status === 'inactive');
+                    break;
+                case 'video':
+                case 'app':
+                case 'survey':
+                case 'social':
+                case 'website':
+                    filtered = tasksData.filter(t => t.type === filter);
+                    break;
+            }
+            
+            currentPage.tasks = 1;
+            displayTasks(filtered);
+        }
+        
+        async function loadPackages() {
+            try {
+                // Mock packages data
+                packagesData = [
+                    { id: 1, username: 'john_doe', package: 'elite', amount: 7500, method: 'korapay', reference: 'PKG-001', status: 'verified', date: '2024-01-15' },
+                    { id: 2, username: 'jane_smith', package: 'knight', amount: 4500, method: 'bank_transfer', reference: 'PKG-002', status: 'verified', date: '2024-01-14' },
+                    { id: 3, username: 'mike_jones', package: 'knight', amount: 4500, method: 'korapay', reference: 'PKG-003', status: 'pending', date: '2024-01-13' },
+                    { id: 4, username: 'sara_wilson', package: 'elite', amount: 7500, method: 'korapay', reference: 'PKG-004', status: 'verified', date: '2024-01-12' },
+                    // Add more mock packages as needed
+                ];
+                
+                displayPackages();
+                
+            } catch (error) {
+                console.error('Error loading packages:', error);
+            }
+        }
+        
+        function displayPackages(filteredPackages = packagesData) {
+            const startIndex = (currentPage.packages - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedPackages = filteredPackages.slice(startIndex, endIndex);
+            const totalPages = Math.ceil(filteredPackages.length / itemsPerPage);
+            
+            const packagesHtml = paginatedPackages.map(pkg => {
+                const statusBadge = pkg.status === 'verified' ? 'badge-active' : 'badge-pending';
+                const statusText = pkg.status === 'verified' ? 'Verified' : 'Pending';
+                const packageBadge = pkg.package === 'elite' ? 'badge-elite' : 'badge-knight';
+                const packageText = pkg.package === 'elite' ? 'Elite' : 'Knight';
+                
+                return `
+                    <tr>
+                        <td>@${pkg.username}</td>
+                        <td>
+                            <span class="status-badge-admin ${packageBadge}">${packageText}</span>
+                        </td>
+                        <td><strong>₦${pkg.amount.toLocaleString()}</strong></td>
+                        <td>${pkg.method === 'korapay' ? 'Korapay' : 'Bank Transfer'}</td>
+                        <td><code>${pkg.reference}</code></td>
+                        <td>
+                            <span class="status-badge-admin ${statusBadge}">${statusText}</span>
+                        </td>
+                        <td>${pkg.date}</td>
+                        <td>
+                            <div class="action-buttons">
+                                ${pkg.status === 'pending' ? `
+                                    <button class="btn-icon approve" onclick="verifyPackage(${pkg.id})" title="Verify Payment">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="btn-icon reject" onclick="rejectPackage(${pkg.id})" title="Reject">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                ` : ''}
+                                <button class="btn-icon view" onclick="viewPackageDetails(${pkg.id})" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            document.getElementById('packagesTableBody').innerHTML = packagesHtml;
+            
+            renderPagination('packages', totalPages);
+        }
+        
+        function searchPackages(query) {
+            const filtered = packagesData.filter(pkg => 
+                pkg.username.toLowerCase().includes(query.toLowerCase()) ||
+                pkg.reference.toLowerCase().includes(query.toLowerCase())
+            );
+            currentPage.packages = 1;
+            displayPackages(filtered);
+        }
+        
+        function filterPackages(filter) {
+            let filtered = packagesData;
+            
+            switch(filter) {
+                case 'pending':
+                    filtered = packagesData.filter(p => p.status === 'pending');
+                    break;
+                case 'verified':
+                    filtered = packagesData.filter(p => p.status === 'verified');
+                    break;
+                case 'knight':
+                    filtered = packagesData.filter(p => p.package === 'knight');
+                    break;
+                case 'elite':
+                    filtered = packagesData.filter(p => p.package === 'elite');
+                    break;
+            }
+            
+            currentPage.packages = 1;
+            displayPackages(filtered);
+        }
+        
+        async function loadLogs() {
+            try {
+                // Mock logs data
+                logsData = [
+                    { id: 1, type: 'info', message: 'User john_doe registered', timestamp: '2024-01-15 09:30:15' },
+                    { id: 2, type: 'payment', message: 'Payment received for PKG-001 (₦7,500)', timestamp: '2024-01-15 10:15:22' },
+                    { id: 3, type: 'warning', message: 'Failed login attempt for user admin', timestamp: '2024-01-15 11:45:10' },
+                    { id: 4, type: 'user', message: 'User jane_smith completed task #2', timestamp: '2024-01-15 12:30:45' },
+                    { id: 5, type: 'error', message: 'Korapay API connection timeout', timestamp: '2024-01-15 14:20:33' },
+                    { id: 6, type: 'info', message: 'Withdrawal WD-2024-001 submitted', timestamp: '2024-01-15 15:10:18' },
+                    // Add more mock logs as needed
+                ];
+                
+                displayLogs();
+                
+            } catch (error) {
+                console.error('Error loading logs:', error);
+            }
+        }
+        
+        function displayLogs(filteredLogs = logsData) {
+            const startIndex = (currentPage.logs - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedLogs = filteredLogs.slice(startIndex, endIndex);
+            const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
+            
+            const logsHtml = paginatedLogs.map(log => {
+                const typeClass = `log-entry ${log.type}`;
+                return `
+                    <div class="${typeClass}">
+                        <div style="display: flex; justify-content: space-between;">
+                            <div>${log.message}</div>
+                            <div style="color: var(--gray); font-size: 0.8rem;">${log.timestamp}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('logsContainer').innerHTML = logsHtml || `
+                <div style="text-align: center; padding: 2rem; color: var(--gray);">
+                    No logs found
+                </div>
+            `;
+            
+            renderPagination('logs', totalPages);
+        }
+        
+        function searchLogs(query) {
+            const filtered = logsData.filter(log => 
+                log.message.toLowerCase().includes(query.toLowerCase())
+            );
+            currentPage.logs = 1;
+            displayLogs(filtered);
+        }
+        
+        function filterLogs(filter) {
+            let filtered = logsData;
+            
+            if (filter !== 'all') {
+                filtered = logsData.filter(log => log.type === filter);
+            }
+            
+            currentPage.logs = 1;
+            displayLogs(filtered);
+        }
+        
+        function loadRecentActivities() {
+            // Mock recent activities
+            const activities = [
+                { type: 'user', text: 'New user registered: @brown_chris', time: '10 minutes ago' },
+                { type: 'payment', text: 'Package purchase: Elite by @sara_wilson', time: '25 minutes ago' },
+                { type: 'withdrawal', text: 'Withdrawal approved: WD-2024-002 (₦8,000)', time: '1 hour ago' },
+                { type: 'task', text: 'Task completed 42 times today', time: '2 hours ago' },
+                { type: 'system', text: 'System backup completed', time: '3 hours ago' }
+            ];
+            
+            const activitiesHtml = activities.map(act => `
+                <div style="display: flex; align-items: center; padding: 1rem; border-bottom: 1px solid #e5e7eb;">
+                    <div style="margin-right: 1rem;">
+                        <i class="fas fa-${getActivityIcon(act.type)}" 
+                           style="color: ${getActivityColor(act.type)};"></i>
+                    </div>
+                    <div style="flex: 1;">
+                        <div>${act.text}</div>
+                        <div style="font-size: 0.9rem; color: var(--gray);">${act.time}</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('recentActivities').innerHTML = activitiesHtml;
+        }
+        
+        function getActivityIcon(type) {
+            const icons = {
+                'user': 'user-plus',
+                'payment': 'credit-card',
+                'withdrawal': 'money-bill-wave',
+                'task': 'tasks',
+                'system': 'cog'
+            };
+            return icons[type] || 'info-circle';
+        }
+        
+        function getActivityColor(type) {
+            const colors = {
+                'user': 'var(--primary-blue)',
+                'payment': 'var(--success)',
+                'withdrawal': 'var(--warning)',
+                'task': 'var(--info)',
+                'system': 'var(--gray)'
+            };
+            return colors[type] || 'var(--gray)';
+        }
+        
+        function renderPagination(type, totalPages) {
+            const paginationElement = document.getElementById(`${type}Pagination`);
+            
+            if (totalPages <= 1) {
+                paginationElement.innerHTML = '';
+                return;
+            }
+            
+            let paginationHtml = '';
+            
+            // Previous button
+            if (currentPage[type] > 1) {
+                paginationHtml += `<button class="page-btn" onclick="changePage('${type}', ${currentPage[type] - 1})">&laquo; Previous</button>`;
+            }
+            
+            // Page numbers
+            const maxVisible = 5;
+            let startPage = Math.max(1, currentPage[type] - Math.floor(maxVisible / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+            
+            if (endPage - startPage + 1 < maxVisible) {
+                startPage = Math.max(1, endPage - maxVisible + 1);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHtml += `<button class="page-btn ${i === currentPage[type] ? 'active' : ''}" onclick="changePage('${type}', ${i})">${i}</button>`;
+            }
+            
+            // Next button
+            if (currentPage[type] < totalPages) {
+                paginationHtml += `<button class="page-btn" onclick="changePage('${type}', ${currentPage[type] + 1})">Next &raquo;</button>`;
+            }
+            
+            paginationElement.innerHTML = paginationHtml;
+        }
+        
+        function changePage(type, page) {
+            currentPage[type] = page;
+            
+            switch(type) {
+                case 'users':
+                    displayUsers();
+                    break;
+                case 'withdrawals':
+                    displayWithdrawals();
+                    break;
+                case 'tasks':
+                    displayTasks();
+                    break;
+                case 'packages':
+                    displayPackages();
+                    break;
+                case 'logs':
+                    displayLogs();
+                    break;
+            }
+        }
+        
+        // Modal functions
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        function showAddTaskModal() {
+            showModal('addTaskModal');
+        }
+        
+        function setupAdminEventListeners() {
+            // Add task form
+            document.getElementById('addTaskForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const taskData = {
+                    title: document.getElementById('taskTitle').value,
+                    type: document.getElementById('taskType').value,
+                    description: document.getElementById('taskDescription').value,
+                    reward: parseInt(document.getElementById('taskReward').value),
+                    duration: parseInt(document.getElementById('taskDuration').value),
+                    maxCompletions: parseInt(document.getElementById('taskMaxCompletions').value),
+                    url: document.getElementById('taskUrl').value,
+                    steps: document.getElementById('taskSteps').value.split('\n').filter(s => s.trim()),
+                    requiresScreenshot: document.getElementById('requiresScreenshot').checked,
+                    requiresQuestion: document.getElementById('requiresQuestion').checked,
+                    question: document.getElementById('taskQuestion').value
+                };
+                
+                // Show loading
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+                submitBtn.disabled = true;
+                
+                try {
+                    // In real app, this would be API call
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    
+                    showAlert('Task created successfully!', 'success');
+                    closeModal('addTaskModal');
+                    
+                    // Reset form
+                    e.target.reset();
+                    
+                    // Reload tasks
+                    loadTasks();
+                    
+                } catch (error) {
+                    showAlert('Failed to create task', 'danger');
+                } finally {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            });
+            
+            // Show/hide question field based on checkbox
+            document.getElementById('requiresQuestion').addEventListener('change', function() {
+                document.getElementById('questionField').style.display = this.checked ? 'block' : 'none';
+            });
+            
+            // Close modals when clicking outside
+            document.querySelectorAll('.modal-overlay').forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        this.style.display = 'none';
+                    }
+                });
+            });
+        }
+        
+        // Action functions
+        function viewUserDetails(userId) {
+            const user = usersData.find(u => u.id === userId);
+            if (!user) return;
+            
+            showAlert(`Viewing user: ${user.username}`, 'info');
+            // In real app, this would open a detailed modal
+        }
+        
+        function editUser(userId) {
+            const user = usersData.find(u => u.id === userId);
+            if (!user) return;
+            
+            showAlert(`Editing user: ${user.username}`, 'info');
+            // In real app, this would open an edit modal
+        }
+        
+        function blockUser(userId) {
+            if (confirm('Are you sure you want to block this user?')) {
+                showAlert('User blocked successfully', 'success');
+                // In real app, this would be API call
+            }
+        }
+        
+        function unblockUser(userId) {
+            if (confirm('Are you sure you want to unblock this user?')) {
+                showAlert('User unblocked successfully', 'success');
+                // In real app, this would be API call
+            }
+        }
+        
+        function viewWithdrawalDetails(withdrawalId) {
+            const withdrawal = withdrawalsData.find(w => w.id === withdrawalId);
+            if (!withdrawal) return;
+            
+            showAlert(`Viewing withdrawal: ${withdrawal.reference}`, 'info');
+            // In real app, this would open a detailed modal
+        }
+        
+        function approveWithdrawal(withdrawalId) {
+            if (confirm('Approve this withdrawal request?')) {
+                showAlert('Withdrawal approved successfully', 'success');
+                // In real app, this would be API call and Korapay integration
+            }
+        }
+        
+        function rejectWithdrawal(withdrawalId) {
+            const reason = prompt('Enter rejection reason:');
+            if (reason) {
+                showAlert(`Withdrawal rejected. Reason: ${reason}`, 'success');
+                // In real app, this would be API call
+            }
+        }
+        
+        function markAsPaid(withdrawalId) {
+            if (confirm('Mark this withdrawal as paid?')) {
+                showAlert('Withdrawal marked as paid', 'success');
+                // In real app, this would update status
+            }
+        }
+        
+        function viewTaskDetails(taskId) {
+            const task = tasksData.find(t => t.id === taskId);
+            if (!task) return;
+            
+            showAlert(`Viewing task: ${task.title}`, 'info');
+        }
+        
+        function editTask(taskId) {
+            const task = tasksData.find(t => t.id === taskId);
+            if (!task) return;
+            
+            showAlert(`Editing task: ${task.title}`, 'info');
+            showAddTaskModal(); // In real app, this would populate the form
+        }
+        
+        function deactivateTask(taskId) {
+            if (confirm('Deactivate this task?')) {
+                showAlert('Task deactivated', 'success');
+                // In real app, this would be API call
+            }
+        }
+        
+        function activateTask(taskId) {
+            if (confirm('Activate this task?')) {
+                showAlert('Task activated', 'success');
+                // In real app, this would be API call
+            }
+        }
+        
+        function verifyPackage(packageId) {
+            if (confirm('Verify this package payment?')) {
+                showAlert('Package verified successfully', 'success');
+                // In real app, this would be API call
+            }
+        }
+        
+        function rejectPackage(packageId) {
+            const reason = prompt('Enter rejection reason:');
+            if (reason) {
+                showAlert(`Package rejected. Reason: ${reason}`, 'success');
+                // In real app, this would be API call
+            }
+        }
+        
+        function viewPackageDetails(packageId) {
+            const pkg = packagesData.find(p => p.id === packageId);
+            if (!pkg) return;
+            
+            showAlert(`Viewing package: ${pkg.reference}`, 'info');
+        }
+        
+        // System control functions
+        function toggleWithdrawalPortal() {
+            const toggle = document.getElementById('portalToggle');
+            const statusText = document.getElementById('portalStatusText');
+            
+            if (toggle.checked) {
+                statusText.textContent = 'Portal is currently OPEN';
+                showAlert('Withdrawal portal opened', 'success');
+            } else {
+                statusText.textContent = 'Portal is currently CLOSED';
+                showAlert('Withdrawal portal closed', 'warning');
+            }
+        }
+        
+        function toggleRegistration() {
+            const toggle = document.getElementById('registrationToggle');
+            showAlert(`User registration ${toggle.checked ? 'enabled' : 'disabled'}`, 'info');
+        }
+        
+        function toggleTaskSystem() {
+            const toggle = document.getElementById('tasksToggle');
+            showAlert(`Task system ${toggle.checked ? 'enabled' : 'disabled'}`, 'info');
+        }
+        
+        // Settings functions
+        function updateCommissionSettings() {
+            const knight = document.getElementById('knightCommission').value;
+            const elite = document.getElementById('eliteCommission').value;
+            
+            showAlert(`Commission settings updated: Knight=₦${knight}, Elite=₦${elite}`, 'success');
+        }
+        
+        function updateWithdrawalSettings() {
+            const affiliateMin = document.getElementById('affiliateMin').value;
+            const taskMin = document.getElementById('taskMin').value;
+            const fee = document.getElementById('withdrawalFee').value;
+            
+            showAlert(`Withdrawal settings updated: Affiliate min=₦${affiliateMin}, Task min=₦${taskMin}, Fee=${fee}%`, 'success');
+        }
+        
+        function updatePackageSettings() {
+            const knightPrice = document.getElementById('knightPrice').value;
+            const elitePrice = document.getElementById('elitePrice').value;
+            const welcomeBonus = document.getElementById('welcomeBonus').value;
+            
+            showAlert(`Package settings updated: Knight=₦${knightPrice}, Elite=₦${elitePrice}, Bonus=₦${welcomeBonus}`, 'success');
+        }
+        
+        function updatePaymentSettings() {
+            showAlert('Payment settings updated successfully', 'success');
+        }
+        
+        function copyWebhookUrl() {
+            const url = document.getElementById('webhookUrl').value;
+            copyToClipboard(url);
+        }
+        
+        // Export functions
+        function exportUsers() {
+            showAlert('Exporting users data...', 'info');
+            // In real app, this would generate and download CSV/Excel
+        }
+        
+        function exportLogs() {
+            showAlert('Exporting system logs...', 'info');
+            // In real app, this would generate and download log file
+        }
+        
+        function clearLogs() {
+            if (confirm('Clear all system logs? This action cannot be undone.')) {
+                showAlert('System logs cleared', 'success');
+                // In real app, this would clear logs from database
+            }
+        }
+        
+        // Danger zone functions
+        function showClearCacheModal() {
+            if (confirm('Clear all system cache? This will not affect user data.')) {
+                showAlert('System cache cleared', 'success');
+            }
+        }
+        
+        function showResetSystemModal() {
+            if (confirm('Reset all test data? This is only for development.')) {
+                showAlert('Test data reset', 'success');
+            }
+        }
+        
+        function showBackupModal() {
+            showAlert('Creating database backup...', 'info');
+            // In real app, this would trigger backup process
+        }
+        
+        function logout() {
+            if (confirm('Logout from admin panel?')) {
+                localStorage.removeItem('nulex_token');
+                localStorage.removeItem('nulex_user');
+                window.location.href = '/login';
+            }
+        }
+    </script>
+</body>
+</html>
