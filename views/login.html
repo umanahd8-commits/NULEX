@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - NULEX</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="logo-container">
+            <img src="https://i.ibb.co/B9d2bfd/6-F10-C074-AF1-B-489-E-B18-F-FD5-FF1-C8-C402.jpg" alt="NULEX Logo" class="logo">
+            <h1 class="site-name">NULEX</h1>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="card" style="max-width: 450px; margin: 4rem auto;">
+            <div class="card-header">
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <img src="https://i.ibb.co/B9d2bfd/6-F10-C074-AF1-B-489-E-B18-F-FD5-FF1-C8-C402.jpg" alt="NULEX Logo" 
+                         style="height: 80px; width: auto; border-radius: 12px; margin-bottom: 1rem;">
+                </div>
+                <h2>Welcome Back to NULEX</h2>
+                <p>Login to access your dashboard and continue earning</p>
+            </div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginUsername" class="form-label">Username or Email *</label>
+                    <input type="text" id="loginUsername" class="form-input" placeholder="Enter username or email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="loginPassword" class="form-label">Password *</label>
+                    <div style="position: relative;">
+                        <input type="password" id="loginPassword" class="form-input" placeholder="Enter your password" required>
+                        <button type="button" onclick="togglePassword('loginPassword')" 
+                                style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer;">
+                            <i class="far fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
+                    <label>
+                        <input type="checkbox" id="rememberMe">
+                        Remember me
+                    </label>
+                    <a href="#" class="link">Forgot Password?</a>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-sign-in-alt"></i> Login to NULEX
+                </button>
+
+                <div class="text-center mt-4">
+                    <p>Don't have an account? <a href="/register" class="link">Register here</a></p>
+                </div>
+
+                <div class="alert alert-info mt-4">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>New Users:</strong> After registration, you'll need to purchase a package to unlock full features.
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 NULEX Platform. All rights reserved.</p>
+        <p>Secure login with encrypted credentials</p>
+    </footer>
+
+    <script src="/js/main.js"></script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+            
+            if (!username || !password) {
+                showAlert('Please fill in all fields', 'danger');
+                return;
+            }
+            
+            // Show loading state
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+            submitBtn.disabled = true;
+            
+            try {
+                // Send login request
+                const response = await apiRequest('/login', 'POST', {
+                    username,
+                    password,
+                    rememberMe
+                });
+                
+                // Store token (in real app, this would be from response)
+                localStorage.setItem('nulex_token', 'demo_token');
+                localStorage.setItem('nulex_user', JSON.stringify({
+                    username: username,
+                    hasPackage: false // This will come from actual API
+                }));
+                
+                showAlert('Login successful! Redirecting...', 'success');
+                
+                // Redirect based on user status
+                // In real app, API will tell us if user has purchased package
+                setTimeout(() => {
+                    // For demo, always go to blocked dashboard
+                    // In real app: response.hasPackage ? '/dashboard' : '/blocked-dashboard'
+                    window.location.href = '/blocked-dashboard';
+                }, 1500);
+                
+            } catch (error) {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+        
+        // Enter key to submit
+        document.getElementById('loginPassword').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+            }
+        });
+    </script>
+</body>
+</html>
