@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdraw Funds - NULEX</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .withdraw-header {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+        
+        .balance-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .balance-card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .balance-card.selected {
+            border-color: var(--primary-blue);
+            background: var(--light-blue);
+        }
+        
+        .balance-card.affiliate:hover {
+            border-color: var(--success);
+        }
+        
+        .balance-card.task:hover {
+            border-color: var(--warning);
+        }
+        
+        .balance-type {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .type-affiliate { background: #d1fae5; color: #065f46; }
+        .type-task { background: #fef3c7; color: #92400e; }
+        
+        .balance-amount {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+        
+        .balance-details {
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .withdraw-form-container {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+        
+        .amount-input-container {
+            position: relative;
+            margin: 1.5rem 0;
+        }
+        
+        .amount-input {
+            font-size: 2rem;
+            font-weight: bold;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            width: 100%;
+            text-align: right;
+        }
+        
+        .amount-input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+        }
+        
+        .currency-symbol {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--gray);
+        }
+        
+        .quick-amounts {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin: 1rem 0;
+        }
+        
+        .quick-amount {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--light-blue);
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .quick-amount:hover {
+            background: var(--light-blue);
+        }
+        
+        .quick-amount.active {
+            background: var(--primary-blue);
+            color: white;
+            border-color: var(--primary-blue);
+        }
+        
+        .bank-verification {
+            background: var(--light-blue);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .verification-status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+        
+        .status-verified { background: #d1fae5; color: #065f46; }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-failed { background: #fee2e2; color: #991b1b; }
+        
+        .fees-breakdown {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .fee-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .fee-total {
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 2px solid #e5e7eb;
+        }
+        
+        .withdrawal-timeline {
+            margin-top: 2rem;
+        }
+        
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: var(--white);
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+        
+        .timeline-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.2rem;
+        }
+        
+        .icon-pending { background: #fef3c7; color: #92400e; }
+        .icon-processing { background: #dbeafe; color: #1e40af; }
+        .icon-completed { background: #d1fae5; color: #065f46; }
+        
+        .withdrawal-history {
+            margin-top: 3rem;
+        }
+        
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .history-table th {
+            background: var(--gray-light);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--gray-dark);
+        }
+        
+        .history-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .badge-pending { background: #fef3c7; color: #92400e; }
+        .badge-processing { background: #dbeafe; color: #1e40af; }
+        .badge-approved { background: #d1fae5; color: #065f46; }
+        .badge-rejected { background: #fee2e2; color: #991b1b; }
+        .badge-paid { background: #d1fae5; color: #065f46; }
+        
+        .portal-status {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            animation: pulse 2s infinite;
+        }
+        
+        .portal-open {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border: 2px solid #10b981;
+        }
+        
+        .portal-closed {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #f59e0b;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        
+        .countdown-timer {
+            font-family: monospace;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--dark-blue);
+            text-align: center;
+            padding: 1rem;
+            background: var(--white);
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+        
+        .bank-selector {
+            position: relative;
+        }
+        
+        .bank-search {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .bank-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+        }
+        
+        .bank-option {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .bank-option:hover {
+            background: var(--light-blue);
+        }
+        
+        @media (max-width: 768px) {
+            .balance-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .amount-input {
+                font-size: 1.5rem;
+            }
+            
+            .history-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo-container">
+            <img src="https://i.ibb.co/B9d2bfd/6-F10-C074-AF1-B-489-E-B18-F-FD5-FF1-C8-C402.jpg" alt="NULEX Logo" class="logo">
+            <h1 class="site-name">NULEX</h1>
+        </div>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <a href="/dashboard" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+            <button onclick="logout()" class="btn btn-secondary">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Withdrawal Header -->
+        <div class="withdraw-header">
+            <h1 style="margin-bottom: 0.5rem;"><i class="fas fa-wallet"></i> Withdraw Funds</h1>
+            <p>Withdraw your earnings to your bank account securely via Korapay</p>
+        </div>
+
+        <!-- Withdrawal Portal Status -->
+        <div id="portalStatus" class="portal-status portal-closed">
+            <div>
+                <h3 style="margin: 0 0 0.5rem 0;"><i class="fas fa-door-closed"></i> Withdrawal Portal Closed</h3>
+                <p style="margin: 0;">Admin has closed withdrawal requests at this time.</p>
+                <small>Next opening: Monday, 9:00 AM</small>
+            </div>
+            <div>
+                <span class="verification-status status-pending">CLOSED</span>
+            </div>
+        </div>
+
+        <!-- Countdown Timer (when portal is scheduled to open) -->
+        <div id="countdownTimer" class="countdown-timer" style="display: none;">
+            Portal opens in: <span id="timerDisplay">00:00:00</span>
+        </div>
+
+        <!-- Balance Selection -->
+        <div class="balance-cards">
+            <div class="balance-card affiliate" onclick="selectBalance('affiliate')">
+                <div class="balance-type type-affiliate">
+                    <i class="fas fa-hand-holding-usd"></i> Affiliate Balance
+                </div>
+                <div class="balance-amount" id="affiliateBalance">₦0.00</div>
+                <div class="balance-details">
+                    <div><i class="fas fa-info-circle"></i> Includes: Welcome Bonus + Referral Earnings</div>
+                    <div><i class="fas fa-money-bill-wave"></i> Minimum Withdrawal: ₦1,000</div>
+                    <div><i class="fas fa-clock"></i> Processing: 24-48 hours</div>
+                </div>
+            </div>
+            
+            <div class="balance-card task" onclick="selectBalance('task')">
+                <div class="balance-type type-task">
+                    <i class="fas fa-briefcase"></i> Task Balance
+                </div>
+                <div class="balance-amount" id="taskBalance">₦0.00</div>
+                <div class="balance-details">
+                    <div><i class="fas fa-info-circle"></i> Earnings from completed tasks</div>
+                    <div><i class="fas fa-money-bill-wave"></i> Minimum Withdrawal: ₦15,000</div>
+                    <div><i class="fas fa-clock"></i> Processing: 24-72 hours</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Withdrawal Form -->
+        <div class="withdraw-form-container" id="withdrawForm" style="display: none;">
+            <h2><i class="fas fa-credit-card"></i> Withdrawal Request</h2>
+            <p>Fill in the details below to request withdrawal</p>
+            
+            <form id="withdrawalRequestForm">
+                <!-- Selected Balance Info -->
+                <div class="alert alert-info" id="selectedBalanceInfo" style="margin-bottom: 1.5rem;"></div>
+                
+                <!-- Amount Input -->
+                <div class="form-group">
+                    <label class="form-label">Amount to Withdraw</label>
+                    <div class="amount-input-container">
+                        <span class="currency-symbol">₦</span>
+                        <input type="number" id="withdrawAmount" class="amount-input" 
+                               placeholder="0.00" min="0" step="100">
+                    </div>
+                    
+                    <!-- Quick Amount Buttons -->
+                    <div class="quick-amounts" id="quickAmounts">
+                        <!-- Generated by JavaScript -->
+                    </div>
+                    
+                    <div class="balance-details" style="margin-top: 1rem;">
+                        <span id="availableBalanceText">Available: ₦0.00</span>
+                        <span id="minAmountText" style="float: right;">Min: ₦0.00</span>
+                    </div>
+                </div>
+                
+                <!-- Bank Details -->
+                <div class="form-group">
+                    <h3><i class="fas fa-university"></i> Bank Details</h3>
+                    <p>Enter your bank account information for withdrawal</p>
+                    
+                    <div class="bank-verification" id="bankVerification">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <div>
+                                <strong>Bank Account Verification</strong>
+                                <span id="verificationStatus" class="verification-status status-pending">NOT VERIFIED</span>
+                            </div>
+                            <button type="button" class="btn btn-secondary" onclick="verifyBankAccount()">
+                                <i class="fas fa-sync-alt"></i> Verify Now
+                            </button>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Select Bank</label>
+                            <div class="bank-selector">
+                                <input type="text" id="bankSearch" class="bank-search" 
+                                       placeholder="Search for your bank..." 
+                                       onfocus="showBankList()" 
+                                       oninput="filterBanks(this.value)">
+                                <div class="bank-results" id="bankResults"></div>
+                            </div>
+                            <input type="hidden" id="selectedBankCode">
+                            <input type="hidden" id="selectedBankName">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Account Number</label>
+                            <input type="text" id="accountNumber" class="form-input" 
+                                   placeholder="Enter 10-digit account number"
+                                   maxlength="10"
+                                   oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Account Name</label>
+                            <input type="text" id="accountName" class="form-input" 
+                                   placeholder="Will auto-fill after verification" readonly>
+                            <small class="text-muted">Verified by Korapay for security</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Fees Breakdown -->
+                <div class="fees-breakdown">
+                    <h4><i class="fas fa-calculator"></i> Fees Breakdown</h4>
+                    <div class="fee-item">
+                        <span>Withdrawal Amount:</span>
+                        <span id="feeAmount">₦0.00</span>
+                    </div>
+                    <div class="fee-item">
+                        <span>Processing Fee (1.5%):</span>
+                        <span id="processingFee">₦0.00</span>
+                    </div>
+                    <div class="fee-item">
+                        <span>Platform Fee:</span>
+                        <span>₦0.00</span>
+                    </div>
+                    <div class="fee-item fee-total">
+                        <span>You Receive:</span>
+                        <span id="netAmount">₦0.00</span>
+                    </div>
+                </div>
+                
+                <!-- Terms Agreement -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <input type="checkbox" id="agreeTerms" required>
+                        I agree that:
+                        <ul style="margin: 0.5rem 0 0 1rem; font-size: 0.9rem;">
+                            <li>Withdrawals require admin approval</li>
+                            <li>Processing takes 24-72 hours</li>
+                            <li>Fees are non-refundable</li>
+                            <li>I have provided correct bank details</li>
+                        </ul>
+                    </label>
+                </div>
+                
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-success btn-block" id="submitWithdrawalBtn">
+                    <i class="fas fa-paper-plane"></i> Submit Withdrawal Request
+                </button>
+                
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle"></i>
+                    <small>Your request will be reviewed by admin. You'll be notified via email when processed.</small>
+                </div>
+            </form>
+        </div>
+
+        <!-- Withdrawal Timeline -->
+        <div class="withdrawal-timeline" id="withdrawalTimeline" style="display: none;">
+            <h3><i class="fas fa-history"></i> Withdrawal Process</h3>
+            <div class="timeline-item">
+                <div class="timeline-icon icon-pending">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div>
+                    <h4 style="margin: 0 0 0.25rem 0;">1. Submit Request</h4>
+                    <p style="margin: 0; color: var(--gray);">You submit withdrawal request with bank details</p>
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-icon icon-processing">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <div>
+                    <h4 style="margin: 0 0 0.25rem 0;">2. Admin Approval</h4>
+                    <p style="margin: 0; color: var(--gray);">Admin reviews and approves your request</p>
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-icon icon-processing">
+                    <i class="fas fa-exchange-alt"></i>
+                </div>
+                <div>
+                    <h4 style="margin: 0 0 0.25rem 0;">3. Korapay Processing</h4>
+                    <p style="margin: 0; color: var(--gray);">Funds transferred via Korapay to your bank</p>
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-icon icon-completed">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div>
+                    <h4 style="margin: 0 0 0.25rem 0;">4. Funds Received</h4>
+                    <p style="margin: 0; color: var(--gray);">Money arrives in your bank account</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Withdrawal History -->
+        <div class="withdrawal-history">
+            <h2><i class="fas fa-history"></i> Withdrawal History</h2>
+            <p>Your previous withdrawal requests and their status</p>
+            
+            <div class="table-responsive">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Reference</th>
+                            <th>Amount</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="withdrawalHistoryBody">
+                        <!-- Filled by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination for History -->
+            <div class="pagination" id="historyPagination" style="margin-top: 1rem;">
+                <!-- Generated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- No History Message -->
+        <div id="noHistoryMessage" class="empty-state" style="display: none; text-align: center; padding: 3rem;">
+            <i class="fas fa-history fa-3x" style="color: var(--light-blue); margin-bottom: 1rem;"></i>
+            <h3>No Withdrawal History</h3>
+            <p>You haven't made any withdrawal requests yet.</p>
+            <p>Complete tasks and earn money to make your first withdrawal!</p>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 NULEX Platform. All rights reserved.</p>
+        <p>Withdrawals processed via Korapay • Secured with bank-level encryption</p>
+    </footer>
+
+    <script src="/js/main.js"></script>
+    <script>
+        // Global variables
+        let selectedBalanceType = null;
+        let selectedBalanceAmount = 0;
+        let minWithdrawalAmount = 0;
+        let portalOpen = false;
+        let portalOpeningTime = null;
+        let countdownInterval = null;
+        let banksList = [];
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        
+        // Check authentication
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!checkAuth()) {
+                window.location.href = '/login';
+                return;
+            }
+            
+            const user = JSON.parse(localStorage.getItem('nulex_user') || '{}');
+            if (!user.hasPackage) {
+                window.location.href = '/blocked-dashboard';
+                return;
+            }
+            
+            // Load user data
+            loadUserBalances();
+            
+            // Check withdrawal portal status
+            checkPortalStatus();
+            
+            // Load banks list
+            loadBanksList();
+            
+            // Load withdrawal history
+            loadWithdrawalHistory();
+            
+            // Setup event listeners
+            setupEventListeners();
+        });
+        
+        function loadUserBalances() {
+            // In real app, this would be an API call
+            const user = JSON.parse(localStorage.getItem('nulex_user') || '{}');
+            
+            // Mock data - in real app, get from API
+            const mockBalances = {
+                affiliateBalance: user.package === 'elite' ? 23500 : 16500,
+                taskBalance: 12500
+            };
+            
+            document.getElementById('affiliateBalance').textContent = `₦${mockBalances.affiliateBalance.toLocaleString()}`;
+            document.getElementById('taskBalance').textContent = `₦${mockBalances.taskBalance.toLocaleString()}`;
+        }
+        
+        function checkPortalStatus() {
+            // In real app, this would be an API call
+            // Mock: portal is closed
+            portalOpen = false;
+            
+            const portalElement = document.getElementById('portalStatus');
+            const countdownElement = document.getElementById('countdownTimer');
+            const formElement = document.getElementById('withdrawForm');
+            const timelineElement = document.getElementById('withdrawalTimeline');
+            
+            if (portalOpen) {
+                // Portal is open
+                portalElement.className = 'portal-status portal-open';
+                portalElement.innerHTML = `
+                    <div>
+                        <h3 style="margin: 0 0 0.5rem 0;"><i class="fas fa-door-open"></i> Withdrawal Portal Open</h3>
+                        <p style="margin: 0;">You can submit withdrawal requests now.</p>
+                        <small>Closes in: 5 hours</small>
+                    </div>
+                    <div>
+                        <span class="verification-status status-verified">OPEN</span>
+                    </div>
+                `;
+                
+                countdownElement.style.display = 'none';
+                formElement.style.display = 'block';
+                timelineElement.style.display = 'block';
+                
+            } else {
+                // Portal is closed
+                portalElement.className = 'portal-status portal-closed';
+                portalElement.innerHTML = `
+                    <div>
+                        <h3 style="margin: 0 0 0.5rem 0;"><i class="fas fa-door-closed"></i> Withdrawal Portal Closed</h3>
+                        <p style="margin: 0;">Admin has closed withdrawal requests at this time.</p>
+                        <small>Next opening: Monday, 9:00 AM</small>
+                    </div>
+                    <div>
+                        <span class="verification-status status-pending">CLOSED</span>
+                    </div>
+                `;
+                
+                // Set next opening time (next Monday 9 AM)
+                const now = new Date();
+                const nextMonday = new Date(now);
+                nextMonday.setDate(now.getDate() + ((1 + 7 - now.getDay()) % 7 || 7));
+                nextMonday.setHours(9, 0, 0, 0);
+                
+                portalOpeningTime = nextMonday;
+                
+                // Show countdown timer
+                countdownElement.style.display = 'block';
+                startCountdownTimer();
+                
+                formElement.style.display = 'none';
+                timelineElement.style.display = 'none';
+            }
+        }
+        
+        function startCountdownTimer() {
+            if (!portalOpeningTime) return;
+            
+            updateCountdownDisplay();
+            
+            countdownInterval = setInterval(() => {
+                updateCountdownDisplay();
+                
+                // Check if portal should open
+                if (new Date() >= portalOpeningTime) {
+                    clearInterval(countdownInterval);
+                    checkPortalStatus(); // This will re-check and open portal
+                }
+            }, 1000);
+        }
+        
+        function updateCountdownDisplay() {
+            if (!portalOpeningTime) return;
+            
+            const now = new Date();
+            const timeLeft = portalOpeningTime - now;
+            
+            if (timeLeft <= 0) {
+                document.getElementById('timerDisplay').textContent = '00:00:00';
+                return;
+            }
+            
+            const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+            
+            document.getElementById('timerDisplay').textContent = 
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        function selectBalance(type) {
+            if (!portalOpen) {
+                showAlert('Withdrawal portal is currently closed. Please wait for it to open.', 'warning');
+                return;
+            }
+            
+            // Reset previous selection
+            document.querySelectorAll('.balance-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Select new balance
+            const selectedCard = event.target.closest('.balance-card');
+            selectedCard.classList.add('selected');
+            
+            selectedBalanceType = type;
+            
+            // Get balance amounts
+            const affiliateBalance = parseInt(document.getElementById('affiliateBalance').textContent.replace(/[^0-9]/g, ''));
+            const taskBalance = parseInt(document.getElementById('taskBalance').textContent.replace(/[^0-9]/g, ''));
+            
+            // Set selected balance amount and minimum
+            if (type === 'affiliate') {
+                selectedBalanceAmount = affiliateBalance;
+                minWithdrawalAmount = 1000;
+            } else {
+                selectedBalanceAmount = taskBalance;
+                minWithdrawalAmount = 15000;
+            }
+            
+            // Update form display
+            updateWithdrawalForm();
+        }
+        
+        function updateWithdrawalForm() {
+            if (!selectedBalanceType) return;
+            
+            const formElement = document.getElementById('withdrawForm');
+            formElement.style.display = 'block';
+            
+            // Update balance info
+            const balanceInfo = document.getElementById('selectedBalanceInfo');
+            balanceInfo.innerHTML = `
+                <i class="fas fa-info-circle"></i>
+                <strong>Selected:</strong> ${selectedBalanceType === 'affiliate' ? 'Affiliate Balance' : 'Task Balance'} 
+                | <strong>Available:</strong> ₦${selectedBalanceAmount.toLocaleString()}
+                | <strong>Minimum:</strong> ₦${minWithdrawalAmount.toLocaleString()}
+            `;
+            
+            // Update amount field
+            document.getElementById('availableBalanceText').textContent = 
+                `Available: ₦${selectedBalanceAmount.toLocaleString()}`;
+            document.getElementById('minAmountText').textContent = 
+                `Min: ₦${minWithdrawalAmount.toLocaleString()}`;
+            
+            // Set amount input limits
+            const amountInput = document.getElementById('withdrawAmount');
+            amountInput.min = minWithdrawalAmount;
+            amountInput.max = selectedBalanceAmount;
+            amountInput.placeholder = `₦${minWithdrawalAmount.toLocaleString()} - ₦${selectedBalanceAmount.toLocaleString()}`;
+            
+            // Generate quick amount buttons
+            generateQuickAmounts();
+            
+            // Update fees
+            calculateFees();
+            
+            // Scroll to form
+            formElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        function generateQuickAmounts() {
+            const quickAmountsDiv = document.getElementById('quickAmounts');
+            const percentages = [25, 50, 75, 100];
+            
+            const quickAmounts = percentages.map(percent => {
+                const amount = Math.floor((selectedBalanceAmount * percent) / 100);
+                // Round to nearest 100
+                return Math.floor(amount / 100) * 100;
+            }).filter(amount => amount >= minWithdrawalAmount);
+            
+            // Add minimum amount as first option
+            if (minWithdrawalAmount <= selectedBalanceAmount) {
+                quickAmounts.unshift(minWithdrawalAmount);
+            }
+            
+            const buttonsHtml = quickAmounts.map(amount => {
+                const isMax = amount === selectedBalanceAmount;
+                return `
+                    <button type="button" class="quick-amount" onclick="setWithdrawalAmount(${amount})">
+                        ${isMax ? 'Max' : `₦${amount.toLocaleString()}`}
+                    </button>
+                `;
+            }).join('');
+            
+            quickAmountsDiv.innerHTML = buttonsHtml;
+        }
+        
+        function setWithdrawalAmount(amount) {
+            // Remove active class from all quick amount buttons
+            document.querySelectorAll('.quick-amount').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+            
+            // Set amount in input
+            document.getElementById('withdrawAmount').value = amount;
+            
+            // Calculate fees
+            calculateFees();
+        }
+        
+        function calculateFees() {
+            const amountInput = document.getElementById('withdrawAmount');
+            const amount = parseFloat(amountInput.value) || 0;
+            
+            if (amount < minWithdrawalAmount) {
+                amountInput.value = minWithdrawalAmount;
+                return calculateFees();
+            }
+            
+            if (amount > selectedBalanceAmount) {
+                amountInput.value = selectedBalanceAmount;
+                return calculateFees();
+            }
+            
+            // Calculate fees
+            const processingFee = Math.round(amount * 0.015); // 1.5%
+            const platformFee = 0;
+            const netAmount = amount - processingFee - platformFee;
+            
+            // Update display
+            document.getElementById('feeAmount').textContent = `₦${amount.toLocaleString()}`;
+            document.getElementById('processingFee').textContent = `₦${processingFee.toLocaleString()}`;
+            document.getElementById('netAmount').textContent = `₦${netAmount.toLocaleString()}`;
+        }
+        
+        function loadBanksList() {
+            // In real app, this would be an API call to Korapay or local database
+            // Mock banks data
+            banksList = [
+                { code: "044", name: "Access Bank" },
+                { code: "063", name: "Access Bank (Diamond)" },
+                { code: "035A", name: "ALAT by WEMA" },
+                { code: "401", name: "ASO Savings and Loans" },
+                { code: "023", name: "Citibank Nigeria" },
+                { code: "050", name: "Ecobank Nigeria" },
+                { code: "562", name: "Ekondo Microfinance Bank" },
+                { code: "070", name: "Fidelity Bank" },
+                { code: "011", name: "First Bank of Nigeria" },
+                { code: "214", name: "First City Monument Bank" },
+                { code: "058", name: "Guaranty Trust Bank" },
+                { code: "030", name: "Heritage Bank" },
+                { code: "301", name: "Jaiz Bank" },
+                { code: "082", name: "Keystone Bank" },
+                { code: "014", name: "MainStreet Bank" },
+                { code: "526", name: "Parallex Bank" },
+                { code: "076", name: "Polaris Bank" },
+                { code: "101", name: "Providus Bank" },
+                { code: "221", name: "Stanbic IBTC Bank" },
+                { code: "068", name: "Standard Chartered Bank" },
+                { code: "232", name: "Sterling Bank" },
+                { code: "100", name: "Suntrust Bank" },
+                { code: "032", name: "Union Bank of Nigeria" },
+                { code: "033", name: "United Bank for Africa" },
+                { code: "215", name: "Unity Bank" },
+                { code: "035", name: "Wema Bank" },
+                { code: "057", name: "Zenith Bank" }
+            ];
+        }
+        
+        function showBankList() {
+            const bankResults = document.getElementById('bankResults');
+            const bankOptionsHtml = banksList.map(bank => `
+                <div class="bank-option" onclick="selectBank('${bank.code}', '${bank.name}')">
+                    ${bank.name}
+                </div>
+            `).join('');
+            
+            bankResults.innerHTML = bankOptionsHtml;
+            bankResults.style.display = 'block';
+        }
+        
+        function filterBanks(searchTerm) {
+            const bankResults = document.getElementById('bankResults');
+            const filteredBanks = banksList.filter(bank => 
+                bank.name.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            
+            const bankOptionsHtml = filteredBanks.map(bank => `
+                <div class="bank-option" onclick="selectBank('${bank.code}', '${bank.name}')">
+                    ${bank.name}
+                </div>
+            `).join('');
+            
+            bankResults.innerHTML = bankOptionsHtml;
+            bankResults.style.display = filteredBanks.length > 0 ? 'block' : 'none';
+        }
+        
+        function selectBank(code, name) {
+            document.getElementById('selectedBankCode').value = code;
+            document.getElementById('selectedBankName').value = name;
+            document.getElementById('bankSearch').value = name;
+            document.getElementById('bankResults').style.display = 'none';
+        }
+        
+        function verifyBankAccount() {
+            const bankCode = document.getElementById('selectedBankCode').value;
+            const accountNumber = document.getElementById('accountNumber').value;
+            
+            if (!bankCode) {
+                showAlert('Please select your bank first', 'danger');
+                return;
+            }
+            
+            if (!accountNumber || accountNumber.length !== 10) {
+                showAlert('Please enter a valid 10-digit account number', 'danger');
+                return;
+            }
+            
+            // Show loading state
+            const verifyBtn = event.target;
+            const originalText = verifyBtn.innerHTML;
+            verifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+            verifyBtn.disabled = true;
+            
+            // In real app, this would be Korapay API call
+            // Simulate API call
+            setTimeout(() => {
+                try {
+                    // Mock verification response
+                    const accountName = "John Chukwuma"; // This would come from Korapay
+                    
+                    document.getElementById('accountName').value = accountName;
+                    document.getElementById('verificationStatus').className = 'verification-status status-verified';
+                    document.getElementById('verificationStatus').textContent = 'VERIFIED';
+                    
+                    showAlert('Bank account verified successfully!', 'success');
+                    
+                } catch (error) {
+                    document.getElementById('verificationStatus').className = 'verification-status status-failed';
+                    document.getElementById('verificationStatus').textContent = 'FAILED';
+                    showAlert('Bank account verification failed. Please check details.', 'danger');
+                } finally {
+                    verifyBtn.innerHTML = originalText;
+                    verifyBtn.disabled = false;
+                }
+            }, 2000);
+        }
+        
+        async function loadWithdrawalHistory() {
+            try {
+                // In real app, this would be an API call
+                // Mock withdrawal history
+                const mockHistory = [
+                    { id: 1, date: '2024-01-15', reference: 'WD-2024-001', amount: 5000, type: 'affiliate', status: 'paid' },
+                    { id: 2, date: '2024-01-10', reference: 'WD-2024-002', amount: 8000, type: 'task', status: 'approved' },
+                    { id: 3, date: '2024-01-05', reference: 'WD-2024-003', amount: 3000, type: 'affiliate', status: 'rejected' },
+                    { id: 4, date: '2024-01-01', reference: 'WD-2024-004', amount: 10000, type: 'task', status: 'pending' },
+                    { id: 5, date: '2023-12-28', reference: 'WD-2023-125', amount: 2000, type: 'affiliate', status: 'paid' },
+                    { id: 6, date: '2023-12-25', reference: 'WD-2023-124', amount: 15000, type: 'task', status: 'paid' },
+                    { id: 7, date: '2023-12-20', reference: 'WD-2023-123', amount: 4500, type: 'affiliate', status: 'paid' }
+                ];
+                
+                displayWithdrawalHistory(mockHistory);
+                
+            } catch (error) {
+                console.error('Error loading withdrawal history:', error);
+                document.getElementById('withdrawalHistoryBody').innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 2rem; color: var(--gray);">
+                            <i class="fas fa-exclamation-triangle"></i> Failed to load history
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+        
+        function displayWithdrawalHistory(history) {
+            if (history.length === 0) {
+                document.getElementById('noHistoryMessage').style.display = 'block';
+                document.getElementById('withdrawalHistory').style.display = 'none';
+                return;
+            }
+            
+            document.getElementById('noHistoryMessage').style.display = 'none';
+            document.getElementById('withdrawalHistory').style.display = 'block';
+            
+            // Paginate history
+            const totalPages = Math.ceil(history.length / itemsPerPage);
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedHistory = history.slice(startIndex, endIndex);
+            
+            // Render history table
+            const historyHtml = paginatedHistory.map(item => `
+                <tr>
+                    <td>${item.date}</td>
+                    <td><code>${item.reference}</code></td>
+                    <td><strong>₦${item.amount.toLocaleString()}</strong></td>
+                    <td>
+                        <span class="status-badge ${item.type === 'affiliate' ? 'badge-approved' : 'badge-pending'}">
+                            ${item.type === 'affiliate' ? 'Affiliate' : 'Task'}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status-badge badge-${item.status}">
+                            ${item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm" onclick="viewWithdrawalDetails(${item.id})">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+            
+            document.getElementById('withdrawalHistoryBody').innerHTML = historyHtml;
+            
+            // Render pagination
+            renderHistoryPagination(totalPages);
+        }
+        
+        function renderHistoryPagination(totalPages) {
+            if (totalPages <= 1) {
+                document.getElementById('historyPagination').innerHTML = '';
+                return;
+            }
+            
+            let paginationHtml = '';
+            
+            // Previous button
+            if (currentPage > 1) {
+                paginationHtml += `<button class="page-btn" onclick="changeHistoryPage(${currentPage - 1})">&laquo; Previous</button>`;
+            }
+            
+            // Page numbers
+            const maxVisible = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+            
+            if (endPage - startPage + 1 < maxVisible) {
+                startPage = Math.max(1, endPage - maxVisible + 1);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHtml += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changeHistoryPage(${i})">${i}</button>`;
+            }
+            
+            // Next button
+            if (currentPage < totalPages) {
+                paginationHtml += `<button class="page-btn" onclick="changeHistoryPage(${currentPage + 1})">Next &raquo;</button>`;
+            }
+            
+            document.getElementById('historyPagination').innerHTML = paginationHtml;
+        }
+        
+        function changeHistoryPage(page) {
+            currentPage = page;
+            loadWithdrawalHistory();
+            window.scrollTo({ top: document.getElementById('withdrawalHistory').offsetTop, behavior: 'smooth' });
+        }
+        
+        function viewWithdrawalDetails(withdrawalId) {
+            showAlert(`Viewing withdrawal details for ID: ${withdrawalId}`, 'info');
+            // In real app, this would open a modal with detailed information
+        }
+        
+        function setupEventListeners() {
+            // Amount input change
+            document.getElementById('withdrawAmount').addEventListener('input', function() {
+                calculateFees();
+                
+                // Remove active class from quick amount buttons
+                document.querySelectorAll('.quick-amount').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+            });
+            
+            // Form submission
+            document.getElementById('withdrawalRequestForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                if (!validateWithdrawalForm()) {
+                    return;
+                }
+                
+                await submitWithdrawalRequest();
+            });
+            
+            // Close bank dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.bank-selector')) {
+                    document.getElementById('bankResults').style.display = 'none';
+                }
+            });
+        }
+        
+        function validateWithdrawalForm() {
+            const amount = parseFloat(document.getElementById('withdrawAmount').value);
+            const bankCode = document.getElementById('selectedBankCode').value;
+            const accountNumber = document.getElementById('accountNumber').value;
+            const accountName = document.getElementById('accountName').value;
+            const agreeTerms = document.getElementById('agreeTerms').checked;
+            
+            // Validate amount
+            if (!amount || amount < minWithdrawalAmount) {
+                showAlert(`Minimum withdrawal amount is ₦${minWithdrawalAmount.toLocaleString()}`, 'danger');
+                return false;
+            }
+            
+            if (amount > selectedBalanceAmount) {
+                showAlert(`Amount exceeds available balance of ₦${selectedBalanceAmount.toLocaleString()}`, 'danger');
+                return false;
+            }
+            
+            // Validate bank details
+            if (!bankCode) {
+                showAlert('Please select your bank', 'danger');
+                return false;
+            }
+            
+            if (!accountNumber || accountNumber.length !== 10) {
+                showAlert('Please enter a valid 10-digit account number', 'danger');
+                return false;
+            }
+            
+            if (!accountName) {
+                showAlert('Please verify your bank account first', 'danger');
+                return false;
+            }
+            
+            // Validate terms
+            if (!agreeTerms) {
+                showAlert('You must agree to the terms and conditions', 'danger');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        async function submitWithdrawalRequest() {
+            const submitBtn = document.getElementById('submitWithdrawalBtn');
+            const originalText = submitBtn.innerHTML;
+            
+            // Show loading state
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            submitBtn.disabled = true;
+            
+            try {
+                // Collect form data
+                const withdrawalData = {
+                    amount: parseFloat(document.getElementById('withdrawAmount').value),
+                    balanceType: selectedBalanceType,
+                    bankCode: document.getElementById('selectedBankCode').value,
+                    bankName: document.getElementById('selectedBankName').value,
+                    accountNumber: document.getElementById('accountNumber').value,
+                    accountName: document.getElementById('accountName').value,
+                    netAmount: parseInt(document.getElementById('netAmount').textContent.replace(/[^0-9]/g, ''))
+                };
+                
+                // In real app, this would be an API call to backend
+                // Simulate API call
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Generate reference
+                const reference = `WD-${new Date().getFullYear()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+                
+                // Show success message
+                showAlert(`Withdrawal request submitted successfully! Reference: ${reference}`, 'success');
+                
+                // Reset form
+                resetWithdrawalForm();
+                
+                // Reload history
+                loadWithdrawalHistory();
+                
+                // Update balance (in real app, this would come from API response)
+                updateBalanceAfterWithdrawal(withdrawalData.amount);
+                
+            } catch (error) {
+                console.error('Withdrawal submission error:', error);
+                showAlert('Failed to submit withdrawal request. Please try again.', 'danger');
+            } finally {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+        
+        function resetWithdrawalForm() {
+            // Reset form fields
+            document.getElementById('withdrawalRequestForm').reset();
+            
+            // Reset selection
+            document.querySelectorAll('.balance-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Reset verification
+            document.getElementById('verificationStatus').className = 'verification-status status-pending';
+            document.getElementById('verificationStatus').textContent = 'NOT VERIFIED';
+            document.getElementById('accountName').value = '';
+            
+            // Reset quick amounts
+            document.querySelectorAll('.quick-amount').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Reset fees
+            document.getElementById('feeAmount').textContent = '₦0.00';
+            document.getElementById('processingFee').textContent = '₦0.00';
+            document.getElementById('netAmount').textContent = '₦0.00';
+            
+            // Hide form
+            document.getElementById('withdrawForm').style.display = 'none';
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        function updateBalanceAfterWithdrawal(amount) {
+            if (selectedBalanceType === 'affiliate') {
+                const currentBalance = parseInt(document.getElementById('affiliateBalance').textContent.replace(/[^0-9]/g, ''));
+                const newBalance = currentBalance - amount;
+                document.getElementById('affiliateBalance').textContent = `₦${newBalance.toLocaleString()}`;
+            } else {
+                const currentBalance = parseInt(document.getElementById('taskBalance').textContent.replace(/[^0-9]/g, ''));
+                const newBalance = currentBalance - amount;
+                document.getElementById('taskBalance').textContent = `₦${newBalance.toLocaleString()}`;
+            }
+        }
+        
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('nulex_token');
+                localStorage.removeItem('nulex_user');
+                window.location.href = '/login';
+            }
+        }
+    </script>
+</body>
+</html>
