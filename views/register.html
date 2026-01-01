@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - NULEX</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="logo-container">
+            <img src="https://i.ibb.co/B9d2bfd/6-F10-C074-AF1-B-489-E-B18-F-FD5-FF1-C8-C402.jpg" alt="NULEX Logo" class="logo">
+            <h1 class="site-name">NULEX</h1>
+        </div>
+        <div>
+            <a href="/login" class="btn btn-secondary">Already have an account? Login</a>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="card" style="max-width: 500px; margin: 2rem auto;">
+            <div class="card-header">
+                <h2>Create Your NULEX Account</h2>
+                <p>Start earning today with our exclusive platform</p>
+            </div>
+
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="username" class="form-label">Username *</label>
+                    <input type="text" id="username" class="form-input" placeholder="Choose a username" required>
+                    <small class="text-muted">This will be your display name</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="email" class="form-label">Email Address *</label>
+                    <input type="email" id="email" class="form-input" placeholder="your@email.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone" class="form-label">Phone Number *</label>
+                    <input type="tel" id="phone" class="form-input" placeholder="08012345678" required>
+                    <small class="text-muted">Use your Nigerian phone number</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Password *</label>
+                    <div style="position: relative;">
+                        <input type="password" id="password" class="form-input" placeholder="Create a strong password" required>
+                        <button type="button" onclick="togglePassword('password')" 
+                                style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer;">
+                            <i class="far fa-eye"></i>
+                        </button>
+                    </div>
+                    <small class="text-muted">Must contain 8+ characters with uppercase, lowercase, and number</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword" class="form-label">Confirm Password *</label>
+                    <div style="position: relative;">
+                        <input type="password" id="confirmPassword" class="form-input" placeholder="Confirm your password" required>
+                        <button type="button" onclick="togglePassword('confirmPassword')" 
+                                style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer;">
+                            <i class="far fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="referrer" class="form-label">Referrer Username (Optional)</label>
+                    <input type="text" id="referrer" class="form-input" placeholder="Enter referrer's username if any">
+                    <small class="text-muted">If someone referred you, enter their username here</small>
+                </div>
+
+                <div class="form-group">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Important:</strong> You must purchase a package to unlock your ₦1,000 welcome bonus and start earning referral commissions.
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <input type="checkbox" id="terms" required>
+                        I agree to the <a href="#" class="link">Terms of Service</a> and <a href="#" class="link">Privacy Policy</a>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-user-plus"></i> Create Account
+                </button>
+
+                <div class="text-center mt-4">
+                    <p>Already have an account? <a href="/login" class="link">Login here</a></p>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 NULEX Platform. All rights reserved.</p>
+        <p>Earn legitimately through tasks and referrals</p>
+    </footer>
+
+    <script src="/js/main.js"></script>
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const referrer = document.getElementById('referrer').value.trim();
+            const terms = document.getElementById('terms').checked;
+            
+            // Validation
+            if (!validateEmail(email)) {
+                showAlert('Please enter a valid email address', 'danger');
+                return;
+            }
+            
+            if (!validatePhone(phone)) {
+                showAlert('Please enter a valid Nigerian phone number (11 digits starting with 0)', 'danger');
+                return;
+            }
+            
+            if (!validatePassword(password)) {
+                showAlert('Password must be at least 8 characters with uppercase, lowercase, and number', 'danger');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showAlert('Passwords do not match', 'danger');
+                return;
+            }
+            
+            if (!terms) {
+                showAlert('You must agree to the Terms of Service', 'danger');
+                return;
+            }
+            
+            // Show loading state
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+            submitBtn.disabled = true;
+            
+            try {
+                // Send registration request
+                const response = await apiRequest('/register', 'POST', {
+                    username,
+                    email,
+                    phone,
+                    password,
+                    referrer: referrer || null
+                });
+                
+                showAlert('Account created successfully! Redirecting to login...', 'success');
+                
+                // Redirect to login after 2 seconds
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 2000);
+                
+            } catch (error) {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+        
+        // Real-time validation
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const requirements = document.createElement('div');
+            requirements.className = 'password-requirements';
+            requirements.innerHTML = `
+                <small style="display: block; margin-top: 5px;">
+                    ${password.length >= 8 ? '✓' : '✗'} At least 8 characters<br>
+                    ${/[A-Z]/.test(password) ? '✓' : '✗'} One uppercase letter<br>
+                    ${/[a-z]/.test(password) ? '✓' : '✗'} One lowercase letter<br>
+                    ${/\d/.test(password) ? '✓' : '✗'} One number
+                </small>
+            `;
+            
+            const existing = this.parentNode.querySelector('.password-requirements');
+            if (existing) existing.remove();
+            this.parentNode.appendChild(requirements);
+        });
+    </script>
+</body>
+</html>
