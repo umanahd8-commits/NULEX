@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Processing - NULEX</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container" style="min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+        <div class="card" style="max-width: 500px; text-align: center;">
+            <div id="loading">
+                <div class="fa-spin" style="font-size: 3rem; color: var(--primary-blue); margin-bottom: 1rem;">
+                    <i class="fas fa-circle-notch"></i>
+                </div>
+                <h2>Verifying Your Payment</h2>
+                <p>Please wait while we verify your payment with Korapay...</p>
+                <div id="progressBar" style="height: 5px; background: var(--gray-light); border-radius: 3px; margin: 2rem 0;">
+                    <div id="progressFill" style="height: 100%; background: var(--primary-blue); border-radius: 3px; width: 0%; transition: width 0.5s;"></div>
+                </div>
+            </div>
+            
+            <div id="success" style="display: none;">
+                <div style="font-size: 4rem; color: var(--success); margin-bottom: 1rem;">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h2>Payment Successful!</h2>
+                <p>Your package has been activated successfully.</p>
+                <div class="alert alert-success" style="margin: 1rem 0;">
+                    <i class="fas fa-gift"></i>
+                    <strong>₦1,000 welcome bonus</strong> has been added to your affiliate balance.
+                </div>
+                <button onclick="redirectToDashboard()" class="btn btn-primary btn-block">
+                    <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+                </button>
+            </div>
+            
+            <div id="failed" style="display: none;">
+                <div style="font-size: 4rem; color: var(--danger); margin-bottom: 1rem;">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <h2>Payment Failed</h2>
+                <p id="errorMessage">Your payment could not be processed.</p>
+                <button onclick="retryPayment()" class="btn btn-secondary" style="margin-right: 1rem;">
+                    <i class="fas fa-redo"></i> Try Again
+                </button>
+                <button onclick="goToPackages()" class="btn btn-primary">
+                    <i class="fas fa-box"></i> Choose Different Package
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get reference from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const reference = urlParams.get('reference') || urlParams.get('trxref');
+            
+            if (!reference) {
+                showError('No payment reference found');
+                return;
+            }
+            
+            // Simulate progress bar
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += 5;
+                document.getElementById('progressFill').style.width = progress + '%';
+                
+                if (progress >= 100) {
+                    clearInterval(progressInterval);
+                    verifyPayment(reference);
+                }
+            }, 200);
+        });
+        
+        async function verifyPayment(reference) {
+            try {
+                const response = await fetch(`/api/payment/verify/${reference}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    showSuccess();
+                    
+                    // Update user data in localStorage
+                    const user = JSON.parse(localStorage.getItem('nulex_user') || '{}');
+                    user.hasPackage = true;
+                    user.package = result.package;
+                    localStorage.setItem('nulex_user', JSON.stringify(user));
+                } else {
+                    showError(result.error || 'Payment verification failed');
+                }
+            } catch (error) {
+                showError('Connection error. Please check your internet and try again.');
+            }
+        }
+        
+        function showSuccess() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('success').style.display = 'block';
+        }
+        
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('failed').style.display = 'block';
+            document.getElementById('errorMessage').textContent = message;
+        }
+        
+        function redirectToDashboard() {
+            window.location.href = '/dashboard';
+        }
+        
+        function retryPayment() {
+            window.location.href = '/blocked-dashboard';
+        }
+        
+        function goToPackages() {
+            window.location.href = '/blocked-dashboard';
+        }
+    </script>
+</body>
+</html>
