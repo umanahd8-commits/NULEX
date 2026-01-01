@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - NULEX</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .balance-card {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .balance-card.affiliate {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+        }
+        
+        .balance-card.task {
+            background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
+        }
+        
+        .balance-card h3 {
+            margin: 0 0 1rem 0;
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .balance-amount {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+        
+        .balance-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 1rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: var(--white);
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            border: 1px solid #e5e7eb;
+        }
+        
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-blue);
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--dark-blue);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .action-btn {
+            background: var(--white);
+            border: 2px solid var(--light-blue);
+            border-radius: 10px;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-blue);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .action-icon {
+            font-size: 2rem;
+            color: var(--primary-blue);
+            margin-bottom: 0.5rem;
+        }
+        
+        .referral-section {
+            background: var(--light-blue);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .referral-link-container {
+            display: flex;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        
+        .referral-link {
+            flex: 1;
+            background: var(--white);
+            border: 2px solid var(--primary-blue);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .copy-btn {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0 1.5rem;
+            cursor: pointer;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e5e7eb;
+            margin-bottom: 2rem;
+        }
+        
+        .tab {
+            padding: 1rem 2rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-weight: 600;
+            color: var(--gray);
+        }
+        
+        .tab.active {
+            color: var(--primary-blue);
+            border-bottom-color: var(--primary-blue);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .withdrawal-status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-approved { background: #d1fae5; color: #065f46; }
+        .status-rejected { background: #fee2e2; color: #991b1b; }
+        .status-paid { background: #dbeafe; color: #1e40af; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo-container">
+            <img src="https://i.ibb.co/B9d2bfd/6-F10-C074-AF1-B-489-E-B18-F-FD5-FF1-C8-C402.jpg" alt="NULEX Logo" class="logo">
+            <h1 class="site-name">NULEX</h1>
+        </div>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="text-align: right;">
+                <div id="userWelcome" style="font-weight: 600; color: var(--dark-blue);"></div>
+                <div id="userPackage" style="font-size: 0.9rem; color: var(--gray);"></div>
+            </div>
+            <button onclick="logout()" class="btn btn-secondary">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Dashboard Tabs -->
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('overview')">
+                <i class="fas fa-tachometer-alt"></i> Overview
+            </div>
+            <div class="tab" onclick="switchTab('tasks')">
+                <i class="fas fa-tasks"></i> Tasks
+            </div>
+            <div class="tab" onclick="switchTab('withdraw')">
+                <i class="fas fa-wallet"></i> Withdraw
+            </div>
+            <div class="tab" onclick="switchTab('referrals')">
+                <i class="fas fa-users"></i> Referrals
+            </div>
+            <div class="tab" onclick="switchTab('history')">
+                <i class="fas fa-history"></i> History
+            </div>
+        </div>
+
+        <!-- Overview Tab -->
+        <div id="overviewTab" class="tab-content active">
+            <!-- Balances -->
+            <div class="dashboard-grid">
+                <div class="balance-card affiliate">
+                    <h3><i class="fas fa-hand-holding-usd"></i> Affiliate Balance</h3>
+                    <div class="balance-amount" id="affiliateBalance">₦0.00</div>
+                    <div class="balance-details">
+                        <span>Min withdrawal: ₦1,000</span>
+                        <span id="affiliateEarnings">Today: ₦0</span>
+                    </div>
+                    <div style="position: absolute; top: 1rem; right: 1rem; opacity: 0.1;">
+                        <i class="fas fa-users fa-3x"></i>
+                    </div>
+                </div>
+                
+                <div class="balance-card task">
+                    <h3><i class="fas fa-briefcase"></i> Task Balance</h3>
+                    <div class="balance-amount" id="taskBalance">₦0.00</div>
+                    <div class="balance-details">
+                        <span>Min withdrawal: ₦15,000</span>
+                        <span id="taskEarnings">Today: ₦0</span>
+                    </div>
+                    <div style="position: absolute; top: 1rem; right: 1rem; opacity: 0.1;">
+                        <i class="fas fa-tasks fa-3x"></i>
+                    </div>
+                </div>
+                
+                <div class="balance-card">
+                    <h3><i class="fas fa-crown"></i> Package Status</h3>
+                    <div class="balance-amount" id="packageType">Knight</div>
+                    <div class="balance-details">
+                        <span>Commission Rate</span>
+                        <span id="commissionRate">₦1,500 per referral</span>
+                    </div>
+                    <div style="position: absolute; top: 1rem; right: 1rem; opacity: 0.1;">
+                        <i class="fas fa-shield-alt fa-3x"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-value" id="totalTasks">0</div>
+                    <div class="stat-label">Tasks Completed</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <div class="stat-value" id="totalReferrals">0</div>
+                    <div class="stat-label">Total Referrals</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <div class="stat-value" id="totalEarnings">₦0</div>
+                    <div class="stat-label">Total Earnings</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-value" id="activeDays">1</div>
+                    <div class="stat-label">Active Days</div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-bolt"></i> Quick Actions</h2>
+                    <p>Access platform features quickly</p>
+                </div>
+                
+                <div class="quick-actions">
+                    <div class="action-btn" onclick="window.location.href='/tasks'">
+                        <div class="action-icon">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <div>View Tasks</div>
+                        <small class="text-muted">Complete tasks to earn</small>
+                    </div>
+                    
+                    <div class="action-btn" onclick="switchTab('withdraw')">
+                        <div class="action-icon">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <div>Withdraw Funds</div>
+                        <small class="text-muted">Request withdrawal</small>
+                    </div>
+                    
+                    <div class="action-btn" onclick="switchTab('referrals')">
+                        <div class="action-icon">
+                            <i class="fas fa-share-alt"></i>
+                        </div>
+                        <div>Refer Friends</div>
+                        <small class="text-muted">Earn commissions</small>
+                    </div>
+                    
+                    <div class="action-btn" onclick="showLessons()">
+                        <div class="action-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <div>View Lessons</div>
+                        <small class="text-muted">Learn & earn</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-history"></i> Recent Activity</h2>
+                    <p>Your latest transactions and actions</p>
+                </div>
+                
+                <div id="recentActivity">
+                    <div style="text-align: center; padding: 3rem 0; color: var(--gray);">
+                        <i class="fas fa-clock fa-2x" style="margin-bottom: 1rem;"></i>
+                        <p>No recent activity found</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tasks Tab -->
+        <div id="tasksTab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-tasks"></i> Available Tasks</h2>
+                    <p>Complete tasks to earn money</p>
+                </div>
+                
+                <div id="tasksList">
+                    <div style="text-align: center; padding: 3rem 0;">
+                        <div class="fa-spin" style="font-size: 2rem; color: var(--primary-blue); margin-bottom: 1rem;">
+                            <i class="fas fa-circle-notch"></i>
+                        </div>
+                        <p>Loading tasks...</p>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <button onclick="window.location.href='/tasks'" class="btn btn-primary">
+                        <i class="fas fa-external-link-alt"></i> View All Tasks
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Withdraw Tab -->
+        <div id="withdrawTab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-wallet"></i> Withdraw Funds</h2>
+                    <p>Request withdrawal from your balances</p>
+                </div>
+                
+                <!-- Withdrawal Portal Status -->
+                <div id="withdrawalPortalStatus" class="alert" style="margin-bottom: 2rem;">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <i class="fas fa-door-closed"></i>
+                            <strong>Withdrawal Portal Closed</strong>
+                            <p style="margin: 0.5rem 0 0 0;">Admin has closed withdrawal requests at this time.</p>
+                        </div>
+                        <div class="withdrawal-status status-pending">CLOSED</div>
+                    </div>
+                </div>
+                
+                <!-- Withdrawal Form -->
+                <form id="withdrawalForm" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">Select Balance to Withdraw From</label>
+                        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                            <button type="button" id="affiliateBtn" class="btn btn-secondary" onclick="selectBalance('affiliate')">
+                                <i class="fas fa-hand-holding-usd"></i> Affiliate Balance
+                            </button>
+                            <button type="button" id="taskBtn" class="btn btn-secondary" onclick="selectBalance('task')">
+                                <i class="fas fa-briefcase"></i> Task Balance
+                            </button>
+                        </div>
+                        <div id="balanceInfo" class="alert alert-info" style="display: none;"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="withdrawAmount" class="form-label">Amount to Withdraw</label>
+                        <input type="number" id="withdrawAmount" class="form-input" placeholder="Enter amount">
+                        <small id="amountHelp" class="text-muted"></small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Bank Details</label>
+                        <input type="text" id="bankName" class="form-input" placeholder="Bank Name" style="margin-bottom: 0.5rem;">
+                        <input type="text" id="accountNumber" class="form-input" placeholder="Account Number" style="margin-bottom: 0.5rem;">
+                        <input type="text" id="accountName" class="form-input" placeholder="Account Name" readonly>
+                        <small class="text-muted">Account name will auto-fill after verification</small>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-paper-plane"></i> Submit Withdrawal Request
+                    </button>
+                </form>
+                
+                <!-- Withdrawal History -->
+                <div class="mt-4">
+                    <h3><i class="fas fa-history"></i> Withdrawal History</h3>
+                    <div id="withdrawalHistory">
+                        <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+                            <thead>
+                                <tr style="background: var(--gray-light);">
+                                    <th style="padding: 0.75rem; text-align: left;">Date</th>
+                                    <th style="padding: 0.75rem; text-align: left;">Amount</th>
+                                    <th style="padding: 0.75rem; text-align: left;">Type</th>
+                                    <th style="padding: 0.75rem; text-align: left;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="withdrawalHistoryBody">
+                                <!-- Filled by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Referrals Tab -->
+        <div id="referralsTab" class="tab-content">
+            <div class="referral-section">
+                <h2><i class="fas fa-users"></i> Referral Program</h2>
+                <p>Invite friends and earn commissions on their package purchases</p>
+                
+                <div class="alert alert-success">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <strong>Commission Rates:</strong>
+                    <div id="commissionDetails" style="margin-top: 0.5rem;">
+                        <!-- Filled by JavaScript -->
+                    </div>
+                </div>
+                
+                <label class="form-label">Your Referral Link</label>
+                <div class="referral-link-container">
+                    <div class="referral-link" id="referralLink">https://nulex.com/register?ref=username123</div>
+                    <button class="copy-btn" onclick="copyReferralLink()">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                </div>
+                <small class="text-muted">Share this link with friends. They must use it during registration.</small>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-chart-line"></i> Referral Statistics</h2>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div class="stat-value" id="totalRefs">0</div>
+                        <div class="stat-label">Total Referrals</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="stat-value" id="refEarnings">₦0</div>
+                        <div class="stat-label">Referral Earnings</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-crown"></i>
+                        </div>
+                        <div class="stat-value" id="knightRefs">0</div>
+                        <div class="stat-label">Knight Referrals</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-crown"></i>
+                        </div>
+                        <div class="stat-value" id="eliteRefs">0</div>
+                        <div class="stat-label">Elite Referrals</div>
+                    </div>
+                </div>
+                
+                <h3 class="mt-4">Referral History</h3>
+                <div id="referralHistory">
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+                        <thead>
+                            <tr style="background: var(--gray-light);">
+                                <th style="padding: 0.75rem; text-align: left;">Date</th>
+                                <th style="padding: 0.75rem; text-align: left;">Username</th>
+                                <th style="padding: 0.75rem; text-align: left;">Package</th>
+                                <th style="padding: 0.75rem; text-align: left;">Commission</th>
+                                <th style="padding: 0.75rem; text-align: left;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="referralHistoryBody">
+                            <!-- Filled by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Tab -->
+        <div id="historyTab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-history"></i> Transaction History</h2>
+                    <p>All your earnings and withdrawals</p>
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <button class="btn btn-secondary" onclick="filterHistory('all')">All</button>
+                    <button class="btn btn-secondary" onclick="filterHistory('earnings')">Earnings</button>
+                    <button class="btn btn-secondary" onclick="filterHistory('withdrawals')">Withdrawals</button>
+                    <button class="btn btn-secondary" onclick="filterHistory('referrals')">Referrals</button>
+                </div>
+                
+                <div id="transactionHistory">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: var(--gray-light);">
+                                <th style="padding: 0.75rem; text-align: left;">Date</th>
+                                <th style="padding: 0.75rem; text-align: left;">Description</th>
+                                <th style="padding: 0.75rem; text-align: left;">Type</th>
+                                <th style="padding: 0.75rem; text-align: left;">Amount</th>
+                                <th style="padding: 0.75rem; text-align: left;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionHistoryBody">
+                            <!-- Filled by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 NULEX Platform. All rights reserved.</p>
+        <p>Withdrawals processed via Korapay • Support available 24/7</p>
+    </footer>
+
+    <script src="/js/main.js"></script>
+    <script>
+        // Check if user is logged in and has package
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!checkAuth()) {
+                window.location.href = '/login';
+                return;
+            }
+            
+            const user = JSON.parse(localStorage.getItem('nulex_user') || '{}');
+            if (!user.hasPackage) {
+                window.location.href = '/blocked-dashboard';
+                return;
+            }
+            
+            // Update user info
+            document.getElementById('userWelcome').textContent = `Welcome, ${user.username || 'User'}!`;
+            document.getElementById('userPackage').textContent = `${user.package ? user.package.charAt(0).toUpperCase() + user.package.slice(1) : 'Knight'} Package`;
+            
+            // Load dashboard data
+            loadDashboardData();
+            loadTasks();
+            checkWithdrawalPortal();
+            loadWithdrawalHistory();
+            loadReferralData();
+            loadTransactionHistory();
+        });
+        
+        function switchTab(tabName) {
+            // Update tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Activate selected tab
+            document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(`${tabName}Tab`).classList.add('active');
+            
+            // Load data for specific tabs
+            if (tabName === 'tasks') {
+                loadTasks();
+            } else if (tabName === 'withdraw') {
+                checkWithdrawalPortal();
+                loadWithdrawalHistory();
+            } else if (tabName === 'referrals') {
+                loadReferralData();
+            } else if (tabName === 'history') {
+                loadTransactionHistory();
+            }
+        }
+        
+        async function loadDashboardData() {
+            try {
+                // In real app, this would be an API call
+                const user = JSON.parse(localStorage.getItem('nulex_user') || '{}');
+                
+                // Simulate API response
+                const mockData = {
+                    affiliateBalance: user.package === 'elite' ? 23500 : 16500,
+                    taskBalance: 12500,
+                    totalTasks: 47,
+                    totalReferrals: 12,
+                    totalEarnings: user.package === 'elite' ? 36000 : 29000,
+                    activeDays: 28,
+                    recentActivity: [
+                        { type: 'task', description: 'Completed: Watch Product Review', amount: 500, time: '2 hours ago' },
+                        { type: 'referral', description: 'Referral: john_doe (Elite)', amount: user.package === 'elite' ? 3500 : 1500, time: '1 day ago' },
+                        { type: 'bonus', description: 'Daily Login Bonus', amount: 100, time: '2 days ago' },
+                        { type: 'withdrawal', description: 'Withdrawal Request', amount: -5000, time: '3 days ago' }
+                    ]
+                };
+                
+                // Update UI
+                document.getElementById('affiliateBalance').textContent = `₦${mockData.affiliateBalance.toLocaleString()}`;
+                document.getElementById('taskBalance').textContent = `₦${mockData.taskBalance.toLocaleString()}`;
+                document.getElementById('totalTasks').textContent = mockData.totalTasks;
+                document.getElementById('totalReferrals').textContent = mockData.totalReferrals;
+                document.getElementById('totalEarnings').textContent = `₦${mockData.totalEarnings.toLocaleString()}`;
+                document.getElementById('activeDays').textContent = mockData.activeDays;
+                
+                // Update package info
+                document.getElementById('packageType').textContent = 
+                    user.package ? user.package.charAt(0).toUpperCase() + user.package.slice(1) : 'Knight';
+                
+                // Update commission rate based on package
+                const commissionRate = user.package === 'elite' 
+                    ? '₦1,500 (Knight) / ₦3,500 (Elite)'
+                    : '₦1,500 per referral';
+                document.getElementById('commissionRate').textContent = commissionRate;
+                
+                // Update recent activity
+                const activityHtml = mockData.recentActivity.map(item => `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid #e5e7eb;">
+                        <div>
+                            <div style="font-weight: 600;">${item.description}</div>
+                            <small style="color: var(--gray);">${item.time}</small>
+                        </div>
+                        <div style="font-weight: bold; color: ${item.amount > 0 ? 'var(--success)' : 'var(--danger)'}">
+                            ${item.amount > 0 ? '+' : ''}₦${Math.abs(item.amount).toLocaleString()}
+                        </div>
+                    </div>
+                `).join('');
+                
+                document.getElementById('recentActivity').innerHTML = activityHtml || `
+                    <div style="text-align: center; padding: 3rem 0; color: var(--gray);">
+                        <i class="fas fa-clock fa-2x" style="margin-bottom: 1rem;"></i>
+                        <p>No recent activity found</p>
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                showAlert('Failed to load dashboard data', 'danger');
+            }
+        }
+        
+        async function loadTasks() {
+            try {
+                // In real app, this would be an API call
+                const mockTasks = [
+                    { id: 1, title: 'Watch Product Review Video', reward: 500, type: 'video', duration: '5 mins' },
+                    { id: 2, title: 'Install & Review Mobile App', reward: 1200, type: 'app', duration: '10 mins' },
+                    { id: 3, title: 'Complete Survey: Shopping Habits', reward: 800, type: 'survey', duration: '7 mins' },
+                    { id: 4, title: 'Follow Instagram Page', reward: 300, type: 'social', duration: '2 mins' }
+                ];
+                
+                const tasksHtml = mockTasks.map(task => `
+                    <div style="background: var(--white); border: 1px solid #e5e7eb; border-radius: 10px; padding: 1.5rem; margin-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="margin: 0 0 0.5rem 0;">${task.title}</h4>
+                                <div style="display: flex; gap: 1rem; font-size: 0.9rem; color: var(--gray);">
+                                    <span><i class="fas fa-${task.type === 'video' ? 'play-circle' : task.type === 'app' ? 'mobile-alt' : 'clipboard-list'}"></i> ${task.type}</span>
+                                    <span><i class="fas fa-clock"></i> ${task.duration}</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="font-size: 1.5rem; font-weight: bold; color: var(--success);">
+                                    ₦${task.reward.toLocaleString()}
+                                </div>
+                                <button class="btn btn-primary" onclick="startTask(${task.id})" style="margin-top: 0.5rem;">
+                                    <i class="fas fa-play"></i> Start Task
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                document.getElementById('tasksList').innerHTML = tasksHtml;
+                
+            } catch (error) {
+                console.error('Error loading tasks:', error);
+                document.getElementById('tasksList').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Failed to load tasks. Please try again.
+                    </div>
+                `;
+            }
+        }
+        
+        async function checkWithdrawalPortal() {
+            try {
+                // In real app, this would be an API call
+                const portalOpen = false; // Simulate closed portal
+                
+                const statusElement = document.getElementById('withdrawalPortalStatus');
+                const formElement = document.getElementById('withdrawalForm');
+                
+                if (portalOpen) {
+                    statusElement.className = 'alert alert-success';
+                    statusElement.innerHTML = `
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <div>
+                                <i class="fas fa-door-open"></i>
+                                <strong>Withdrawal Portal Open</strong>
+                                <p style="margin: 0.5rem 0 0 0;">You can submit withdrawal requests until 11:59 PM today.</p>
+                            </div>
+                            <div class="withdrawal-status status-approved">OPEN</div>
+                        </div>
+                    `;
+                    formElement.style.display = 'block';
+                    
+                    // Set balance info
+                    const user = JSON.parse(localStorage.getItem('nulex_user') || '{}');
+                    const mockData = {
+                        affiliateBalance: user.package === 'elite' ? 23500 : 16500,
+                        taskBalance: 12500
+                    };
+                    
+                    document.getElementById('affiliateBalance').textContent = `₦${mockData.affiliateBalance.toLocaleString()}`;
+                    document.getElementById('taskBalance').textContent = `₦${mockData.taskBalance.toLocaleString()}`;
+                    
+                } else {
+                    statusElement.className = 'alert alert-warning';
+                    statusElement.innerHTML = `
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <div>
+                                <i class="fas fa-door-closed"></i>
+                                <strong>Withdrawal Portal Closed</strong>
+                                <p style="margin: 0.5rem 0 0 0;">Admin has closed withdrawal requests at this time.</p>
+                            </div>
+                            <div class="withdrawal-status status-pending">CLOSED</div>
+                        </div>
+                    `;
+                    formElement.style.display = 'none';
+                }
+                
+            } catch (error) {
+                console.error('Error checking withdrawal portal:', error);
+            }
+        }
+        
+        let selectedBalanceType = null;
+        
+        function selectBalance(type) {
+            selectedBalanceType = type;
+            
+            // Update button styles
+            document.getElementById('affiliateBtn').className = 
+                type === 'affiliate' ? 'btn btn-success' : 'btn btn-secondary';
+            document.getElementById('taskBtn').className = 
+                type === 'task' ? 'btn btn-warning' : 'btn btn-secondary';
+            
+            // Show balance info
+            const balanceInfo = document.getElementById('balanceInfo');
+            const minAmount = type === 'affiliate' ? 1000 : 15000;
+            const user = JSON.parse(localStorage.getItem('nulex_user') || '{}');
+            const mockBalance = type === 'affiliate' 
+                ? (user.package === 'elite' ? 23500 : 16500)
+                : 12500;
+            
+            balanceInfo.innerHTML = `
+                <i class="fas fa-info-circle"></i>
+                <strong>Available Balance:</strong> ₦${mockBalance.toLocaleString()} | 
+                <strong>Minimum Withdrawal:</strong> ₦${minAmount.toLocaleString()}
+            `;
+            balanceInfo.style.display = 'block';
+            
+            // Update amount field help text
+            document.getElementById('amountHelp').textContent = 
+                `Enter amount between ₦${minAmount.toLocaleString()} and ₦${mockBalance.toLocaleString()}`;
+            
+            // Reset amount field
+            document.getElementById('withdrawAmount').value = '';
+            document.getElementById('withdrawAmount').min = minAmount;
+            document.getElementById('withdrawAmount').max = mockBalance;
+            document.getElementById('withdrawAmount').placeholder = `₦${minAmount.toLocaleString()} - ₦${mockBalance.toLocaleString()}`;
+        }
+        
+        async function loadWithdrawalHistory() {
+            try {
+                // In real app, this would be an API call
+                const mockHistory = [
+                    { id: 1, date: '2024-01-15', amount: 5000, type: 'affiliate', status: 'paid' },
+                    { id: 2, date: '2024-01-10', amount: 8000, type: 'task', status: 'approved' },
+                    { id: 3, date: '2024-01-05', amount: 3000, type: 'affiliate', status: 'rejected' },
+                    { id: 4, date: '2024-01-01', amount: 10000, type: 'task', status: 'pending' }
+                ];
+                
+                const historyHtml = mockHistory.map(item => `
+                    <tr style="border-bottom: 1px solid #e5e7eb;">
+                        <td style="padding: 0.75rem;">${item.date}</td>
+                        <td style="padding: 0.75rem; font-weight: 600;">₦${item.amount.toLocaleString()}</td>
+                        <td style="padding: 0.75rem;">
+                            <span class="withdrawal-status ${item.type === 'affiliate' ? 'status-approved' : 'status-pending'}" style="font-size: 0.7rem;">
+                                ${item.type === 'affiliate' ? 'Affiliate' : 'Task'}
+                            </span>
+                        </td>
+                        <td style="padding: 0.75rem;">
+                            <span class="withdrawal-status status-${item.status}">
+                                ${item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+                            </span>
+                        </td>
+                    </tr>
+                `).join('');
+                
+                document.getElementById('withdrawalHistoryBody').innerHTML = historyHtml || `
+                    <tr>
+                        <td colspan="4" style="padding: 2rem; text-align: center; color: var(--gray);">
+                            No withdrawal history found
+                        </td>
+                    </tr>
+                `;
+                
+            } catch (error) {
+                console.error('Error loading withdrawal history:', error);
+            }
+        }
+        
+        async function loadReferralData() {
+            try {
+                const user = JSON.parse(localStorage.getItem('nulex_user') || '{}');
+                
+                // Update commission details
+                const commissionDetails = document.getElementById('commissionDetails');
+                if (user.package === 'elite') {
+                    commissionDetails.innerHTML = `
+                        • ₦1,500 for each Knight package referral<br>
+                        • ₦3,500 for each Elite package referral<br>
+                        • Referrals only count when you have an active package
+                    `;
+                } else {
+                    commissionDetails.innerHTML = `
+                        • ₦1,500 for any package referral (Knight or Elite)<br>
+                        • Referrals only count when you have an active package
+                    `;
+                }
+                
+                // Update referral link
+                document.getElementById('referralLink').textContent = 
+                    `${window.location.origin}/register?ref=${user.username || 'user123'}`;
+                
+                // Mock referral data
+                const mockData = {
+                    totalRefs: 12,
+                    refEarnings: user.package === 'elite' ? 28500 : 18000,
+                    knightRefs: 8,
+                    eliteRefs: 4,
+                    referralHistory: [
+                        { date: '2024-01-15', username: 'john_doe', package: 'elite', commission: user.package === 'elite' ? 3500 : 1500, status: 'paid' },
+                        { date: '2024-01-14', username: 'jane_smith', package: 'knight', commission: 1500, status: 'paid' },
+                        { date: '2024-01-10', username: 'mike_jones', package: 'knight', commission: 1500, status: 'pending' },
+                        { date: '2024-01-05', username: 'sara_wilson', package: 'elite', commission: user.package === 'elite' ? 3500 : 1500, status: 'paid' }
+                    ]
+                };
+                
+                // Update stats
+                document.getElementById('totalRefs').textContent = mockData.totalRefs;
+                document.getElementById('refEarnings').textContent = `₦${mockData.refEarnings.toLocaleString()}`;
+                document.getElementById('knightRefs').textContent = mockData.knightRefs;
+                document.getElementById('eliteRefs').textContent = mockData.eliteRefs;
+                
+                // Update referral history
+                const historyHtml = mockData.referralHistory.map(item => `
+                    <tr style="border-bottom: 1px solid #e5e7eb;">
+                        <td style="padding: 0.75rem;">${item.date}</td>
+                        <td style="padding: 0.75rem;">@${item.username}</td>
+                        <td style="padding: 0.75rem;">
+                            <span class="withdrawal-status ${item.package === 'elite' ? 'status-approved' : 'status-pending'}" style="font-size: 0.7rem;">
+                                ${item.package.charAt(0).toUpperCase() + item.package.slice(1)}
+                            </span>
+                        </td>
+                        <td style="padding: 0.75rem; font-weight: 600; color: var(--success);">
+                            ₦${item.commission.toLocaleString()}
+                        </td>
+                        <td style="padding: 0.75rem;">
+                            <span class="withdrawal-status status-${item.status}">
+                                ${item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+                            </span>
+                        </td>
+                    </tr>
+                `).join('');
+                
+                document.getElementById('referralHistoryBody').innerHTML = historyHtml;
+                
+            } catch (error) {
+                console.error('Error loading referral data:', error);
+            }
+        }
+        
+        function copyReferralLink() {
+            const link = document.getElementById('referralLink').textContent;
+            copyToClipboard(link);
+        }
+        
+        async function loadTransactionHistory() {
+            try {
+                // Mock transaction history
+                const mockTransactions = [
+                    { date: '2024-01-15', description: 'Task Completion: Video Review', type: 'task_earning', amount: 500, status: 'completed' },
+                    { date: '2024-01-14', description: 'Referral Commission: @john_doe', type: 'referral', amount: 3500, status: 'completed' },
+                    { date: '2024-01-12', description: 'Withdrawal Request', type: 'withdrawal', amount: -5000, status: 'pending' },
+                    { date: '2024-01-10', description: 'Welcome Bonus', type: 'bonus', amount: 1000, status: 'completed' },
+                    { date: '2024-01-08', description: 'Task Completion: App Install', type: 'task_earning', amount: 1200, status: 'completed' },
+                    { date: '2024-01-05', description: 'Package Purchase: Elite', type: 'package_purchase', amount: -7500, status: 'completed' }
+                ];
+                
+                const transactionsHtml = mockTransactions.map(trans => `
+                    <tr style="border-bottom: 1px solid #e5e7eb;">
+                        <td style="padding: 0.75rem;">${trans.date}</td>
+                        <td style="padding: 0.75rem;">${trans.description}</td>
+                        <td style="padding: 0.75rem;">
+                            <span class="withdrawal-status status-pending" style="font-size: 0.7rem;">
+                                ${trans.type.replace('_', ' ').charAt(0).toUpperCase() + trans.type.replace('_', ' ').slice(1)}
+                            </span>
+                        </td>
+                        <td style="padding: 0.75rem; font-weight: 600; color: ${trans.amount > 0 ? 'var(--success)' : 'var(--danger)'};">
+                            ${trans.amount > 0 ? '+' : ''}₦${Math.abs(trans.amount).toLocaleString()}
+                        </td>
+                        <td style="padding: 0.75rem;">
+                            <span class="withdrawal-status status-${trans.status}">
+                                ${trans.status.charAt(0).toUpperCase() + trans.status.slice(1)}
+                            </span>
+                        </td>
+                    </tr>
+                `).join('');
+                
+                document.getElementById('transactionHistoryBody').innerHTML = transactionsHtml;
+                
+            } catch (error) {
+                console.error('Error loading transaction history:', error);
+            }
+        }
+        
+        function filterHistory(type) {
+            // This would filter the transaction history in real app
+            showAlert(`Showing ${type} history`, 'info');
+        }
+        
+        function startTask(taskId) {
+            showAlert(`Starting task ${taskId}. Redirecting to task page...`, 'info');
+            setTimeout(() => {
+                window.location.href = `/task-detail?id=${taskId}`;
+            }, 1500);
+        }
+        
+        function showLessons() {
+            showAlert('Lessons feature coming soon!', 'info');
+        }
+        
+        // Handle withdrawal form submission
+        document.getElementById('withdrawalForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const amount = parseFloat(document.getElementById('withdrawAmount').value);
+            const bankName = document.getElementById('bankName').value.trim();
+            const accountNumber = document.getElementById('accountNumber').value.trim();
+            
+            if (!selectedBalanceType) {
+                showAlert('Please select a balance type', 'danger');
+                return;
+            }
+            
+            if (!amount || amount <= 0) {
+                showAlert('Please enter a valid amount', 'danger');
+                return;
+            }
+            
+            const minAmount = selectedBalanceType === 'affiliate' ? 1000 : 15000;
+            if (amount < minAmount) {
+                showAlert(`Minimum withdrawal for ${selectedBalanceType} balance is ₦${minAmount.toLocaleString()}`, 'danger');
+                return;
+            }
+            
+            if (!bankName || !accountNumber) {
+                showAlert('Please enter bank details', 'danger');
+                return;
+            }
+            
+            if (accountNumber.length !== 10) {
+                showAlert('Account number must be 10 digits', 'danger');
+                return;
+            }
+            
+            // Verify account with Korapay (simulated)
+            showAlert('Verifying bank account with Korapay...', 'info');
+            
+            // Simulate Korapay verification
+            setTimeout(async () => {
+                try {
+                    // In real app, this would be API call to Korapay
+                    const accountName = "John Doe"; // This would come from Korapay API
+                    document.getElementById('accountName').value = accountName;
+                    
+                    // Submit withdrawal request
+                    showAlert('Bank account verified! Submitting withdrawal request...', 'success');
+                    
+                    // In real app, this would be API call to backend
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    showAlert('Withdrawal request submitted successfully! Admin will review it.', 'success');
+                    
+                    // Reset form
+                    e.target.reset();
+                    selectedBalanceType = null;
+                    document.getElementById('affiliateBtn').className = 'btn btn-secondary';
+                    document.getElementById('taskBtn').className = 'btn btn-secondary';
+                    document.getElementById('balanceInfo').style.display = 'none';
+                    
+                    // Reload history
+                    loadWithdrawalHistory();
+                    
+                } catch (error) {
+                    showAlert('Bank account verification failed. Please check details.', 'danger');
+                }
+            }, 2000);
+        });
+        
+        // Auto-fill account name when account number is entered
+        document.getElementById('accountNumber').addEventListener('blur', function() {
+            if (this.value.length === 10) {
+                // Simulate Korapay account verification
+                setTimeout(() => {
+                    document.getElementById('accountName').value = 'John Doe'; // Mock response
+                }, 500);
+            }
+        });
+        
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('nulex_token');
+                localStorage.removeItem('nulex_user');
+                window.location.href = '/login';
+            }
+        }
+    </script>
+</body>
+</html>
