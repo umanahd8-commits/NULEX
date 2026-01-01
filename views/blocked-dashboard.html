@@ -284,29 +284,53 @@
             `;
         }
         
-        function simulatePayment() {
-            // Simulate payment processing
-            showAlert('Processing payment...', 'info');
-            
-            setTimeout(() => {
-                showAlert('Payment successful! Activating your account...', 'success');
-                
-                // Store package purchase in localStorage (in real app, this would be API call)
-                localStorage.setItem('nulex_package', selectedPackage);
-                
-                // Update user data
-                const user = JSON.parse(localStorage.getItem('nulex_user') || '{}');
-                user.hasPackage = true;
-                user.package = selectedPackage;
-                localStorage.setItem('nulex_user', JSON.stringify(user));
-                
-                // Close modal and redirect
-                setTimeout(() => {
-                    closePaymentModal();
-                    window.location.href = '/dashboard';
-                }, 2000);
-            }, 3000);
+        function async function processRealPayment(packageType) {
+    try {
+        // Get user data
+        const user = JSON.parse(localStorage.getItem('nulex_user') || '{}');
+        const token = localStorage.getItem('nulex_token');
+        
+        if (!token || !user.id) {
+            showAlert('Please login again', 'danger');
+            window.location.href = '/login';
+            return;
         }
+        
+        const packagePrices = {
+            knight: 4500,
+            elite: 7500
+        };
+        
+        // Initialize payment with backend
+        const response = await fetch('/api/payment/initialize-package', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                userId: user.id,
+                packageType: packageType,
+                email: user.email,
+                amount: packagePrices[packageType],
+                callback_url: `${window.location.origin}/payment-callback`
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success && result.authorization_url) {
+            // Redirect to Korapay payment page
+            window.location.href = result.authorization_url;
+        } else {
+            throw new Error(result.error || 'Payment initialization failed');
+        }
+        
+    } catch (error) {
+        console.error('Payment error:', error);
+        showAlert(error.message, 'danger');
+    }
+}
         
         function submitBankPayment() {
             showAlert('Payment proof submitted! Admin will verify within 24 hours.', 'success');
