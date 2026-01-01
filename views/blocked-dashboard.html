@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - NULEX</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="logo-container">
+            <img src="https://i.ibb.co/B9d2bfd/6-F10-C074-AF1-B-489-E-B18-F-FD5-FF1-C8-C402.jpg" alt="NULEX Logo" class="logo">
+            <h1 class="site-name">NULEX</h1>
+        </div>
+        <div>
+            <button onclick="logout()" class="btn btn-secondary">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Warning Banner -->
+        <div class="alert alert-warning" style="margin-bottom: 2rem;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-lock fa-2x"></i>
+                <div>
+                    <h3 style="margin: 0 0 5px 0;">Account Not Fully Activated</h3>
+                    <p style="margin: 0;">Your dashboard is locked. Purchase a package to unlock full features and withdraw your welcome bonus.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Welcome Bonus Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-gift"></i> Welcome Bonus</h2>
+                <p>Your bonus is waiting! Unlock it by purchasing a package.</p>
+            </div>
+            
+            <div style="text-align: center; padding: 2rem 0;">
+                <div style="font-size: 3rem; color: var(--warning); margin-bottom: 1rem;">
+                    ₦1,000
+                </div>
+                <div class="alert alert-info" style="display: inline-block; margin-bottom: 1rem;">
+                    <i class="fas fa-lock"></i> Locked - Package Required
+                </div>
+                <p>This bonus will be added to your Affiliate Balance once you purchase any package.</p>
+            </div>
+        </div>
+
+        <!-- Packages Section -->
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-crown"></i> Choose Your Package</h2>
+                <p>Select a package to unlock full platform access and start earning</p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 1rem;">
+                <!-- Knight Package -->
+                <div class="package-card" style="border: 2px solid var(--primary-blue); border-radius: 12px; padding: 1.5rem; position: relative;">
+                    <div style="position: absolute; top: -12px; left: 20px; background: var(--primary-blue); color: white; padding: 5px 15px; border-radius: 20px;">
+                        MOST POPULAR
+                    </div>
+                    
+                    <h3 style="color: var(--primary-blue); margin-bottom: 1rem;">
+                        <i class="fas fa-shield-alt"></i> Knight Package
+                    </h3>
+                    
+                    <div style="font-size: 2.5rem; color: var(--dark-blue); font-weight: bold; margin-bottom: 1rem;">
+                        ₦4,500
+                    </div>
+                    
+                    <ul style="list-style: none; padding: 0; margin-bottom: 1.5rem;">
+                        <li style="margin-bottom: 0.5rem;">
+                            <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                            Unlock ₦1,000 Welcome Bonus
+                        </li>
+                        <li style="margin-bottom: 0.5rem;">
+                            <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                            Access to All Tasks
+                        </li>
+                        <li style="margin-bottom: 0.5rem;">
+                            <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                            ₦1,500 Referral Commission
+                        </li>
+                        <li style="margin-bottom: 0.5rem;">
+                            <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                            Daily Task Access
+                        </li>
+                        <li style="margin-bottom: 0.5rem;">
+                            <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                            Withdrawal Enabled
+                        </li>
+                    </ul>
+                    
+                    <button class="btn btn-primary btn-block" onclick="selectPackage('knight')">
+                        <i class="fas fa-shopping-cart"></i> Select Knight Package
+                    </button>
+                </div>
+
+                <!-- Elite Package -->
+                <div class="package-card" style="border: 2px solid var(--warning); border-radius: 12px; padding: 1.5rem; position: relative;">
+                    <div style="position: absolute; top: -12px; left: 20px; background: var(--warning); color: white; padding: 5px 15px; border-radius: 20px;">
+                        PREMIUM
+                    </div>
+                    
+                    <h3 style="color: var(--warning); margin-bottom: 1rem;">
+                        <i class="fas fa-crown"></i> Elite Package
+                    </h3>
+                    
+                    <div style="font-size: 2.5rem; color: var(--warning); font-weight: bold; margin-bottom: 1rem;">
+                        ₦7,500
+                    </div>
+                    
+                    <ul style="list-style: none; padding: 0; margin-bottom: 1.5rem;">
+                        <li style="margin-bottom: 0.5rem;">
+                            <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                            Unlock ₦1,000 Welcome Bonus
+                        </li>
+                        <li style="margin-bottom: 0.5rem;">
+                            <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                            Access to Premium Tasks
+                        </li>
+                        <li style="margin-bottom: 0.5rem;">
+                            <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                            Higher Referral Commissions
+                        </li>
+                        <li style="margin-bottom: 0.5rem;">
+                            <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                            <strong>₦1,500</strong> for Knight referrals
+                        </li>
+                        <li style="margin-bottom: 0.5rem;">
+                            <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                            <strong>₦3,500</strong> for Elite referrals
+                        </li>
+                        <li style="margin-bottom: 0.5rem;">
+                            <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                            Priority Support
+                        </li>
+                        <li style="margin-bottom: 0.5rem;">
+                            <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                            Faster Withdrawal Processing
+                        </li>
+                    </ul>
+                    
+                    <button class="btn btn-warning btn-block" onclick="selectPackage('elite')">
+                        <i class="fas fa-crown"></i> Select Elite Package
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Modal (Hidden by default) -->
+        <div id="paymentModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+            <div class="card" style="max-width: 500px; max-height: 90vh; overflow-y: auto;">
+                <div class="card-header">
+                    <h2 id="modalTitle">Complete Payment</h2>
+                    <button onclick="closePaymentModal()" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; cursor: pointer;">
+                        &times;
+                    </button>
+                </div>
+                
+                <div id="paymentContent">
+                    <!-- Content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 NULEX Platform. All rights reserved.</p>
+        <p>Payments secured by Korapay • Support: support@nulex.com</p>
+    </footer>
+
+    <script src="/js/main.js"></script>
+    <script>
+        // Check if user is logged in
+        if (!checkAuth()) {
+            window.location.href = '/login';
+        }
+        
+        let selectedPackage = null;
+        
+        function selectPackage(packageType) {
+            selectedPackage = packageType;
+            
+            const packages = {
+                knight: {
+                    name: 'Knight Package',
+                    price: 4500,
+                    description: 'Standard package with basic features'
+                },
+                elite: {
+                    name: 'Elite Package',
+                    price: 7500,
+                    description: 'Premium package with higher commissions'
+                }
+            };
+            
+            const pkg = packages[packageType];
+            
+            document.getElementById('modalTitle').textContent = `Purchase ${pkg.name}`;
+            
+            document.getElementById('paymentContent').innerHTML = `
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <div style="font-size: 2.5rem; color: var(--dark-blue); font-weight: bold; margin-bottom: 1rem;">
+                        ₦${pkg.price.toLocaleString()}
+                    </div>
+                    <p>${pkg.description}</p>
+                </div>
+                
+                <div class="alert alert-success">
+                    <i class="fas fa-gift"></i>
+                    <strong>Bonus:</strong> You'll immediately receive ₦1,000 welcome bonus upon successful payment.
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Payment Method</label>
+                    <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                        <button type="button" onclick="showKorapayPayment()" class="btn btn-primary" style="flex: 1;">
+                            <i class="fas fa-credit-card"></i> Pay with Korapay
+                        </button>
+                        <button type="button" onclick="showBankTransfer()" class="btn btn-secondary" style="flex: 1;">
+                            <i class="fas fa-university"></i> Bank Transfer
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="paymentDetails">
+                    <!-- Payment method details will appear here -->
+                </div>
+                
+                <div class="alert alert-info mt-4">
+                    <i class="fas fa-info-circle"></i>
+                    <small>After payment verification, your account will be activated immediately. Payments are processed securely via Korapay.</small>
+                </div>
+            `;
+            
+            document.getElementById('paymentModal').style.display = 'flex';
+        }
+        
+        function closePaymentModal() {
+            document.getElementById('paymentModal').style.display = 'none';
+            selectedPackage = null;
+        }
+        
+        function showKorapayPayment() {
+            document.getElementById('paymentDetails').innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">Redirecting to Korapay...</label>
+                    <p>You will be redirected to Korapay's secure payment page to complete your transaction.</p>
+                    <div style="text-align: center; padding: 2rem;">
+                        <div class="fa-spin" style="font-size: 3rem; color: var(--primary-blue); margin-bottom: 1rem;">
+                            <i class="fas fa-circle-notch"></i>
+                        </div>
+                        <p>Preparing secure payment gateway...</p>
+                    </div>
+                </div>
+                <button type="button" onclick="simulatePayment()" class="btn btn-success btn-block">
+                    <i class="fas fa-lock"></i> Simulate Payment (Demo)
+                </button>
+            `;
+        }
+        
+        function showBankTransfer() {
+            document.getElementById('paymentDetails').innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">Bank Transfer Details</label>
+                    <div class="alert alert-info">
+                        <p><strong>Bank:</strong> Zenith Bank</p>
+                        <p><strong>Account Name:</strong> NULEX TECHNOLOGIES LTD</p>
+                        <p><strong>Account Number:</strong> 1234567890</p>
+                        <p><strong>Amount:</strong> ₦${selectedPackage === 'knight' ? '4,500' : '7,500'}</p>
+                    </div>
+                    <p>After making transfer, upload proof below:</p>
+                    <input type="file" class="form-input" accept="image/*,.pdf">
+                    <small class="text-muted">Upload screenshot of transaction receipt (JPEG, PNG or PDF)</small>
+                </div>
+                <button type="button" onclick="submitBankPayment()" class="btn btn-primary btn-block">
+                    <i class="fas fa-upload"></i> Submit Payment Proof
+                </button>
+            `;
+        }
+        
+        function simulatePayment() {
+            // Simulate payment processing
+            showAlert('Processing payment...', 'info');
+            
+            setTimeout(() => {
+                showAlert('Payment successful! Activating your account...', 'success');
+                
+                // Store package purchase in localStorage (in real app, this would be API call)
+                localStorage.setItem('nulex_package', selectedPackage);
+                
+                // Update user data
+                const user = JSON.parse(localStorage.getItem('nulex_user') || '{}');
+                user.hasPackage = true;
+                user.package = selectedPackage;
+                localStorage.setItem('nulex_user', JSON.stringify(user));
+                
+                // Close modal and redirect
+                setTimeout(() => {
+                    closePaymentModal();
+                    window.location.href = '/dashboard';
+                }, 2000);
+            }, 3000);
+        }
+        
+        function submitBankPayment() {
+            showAlert('Payment proof submitted! Admin will verify within 24 hours.', 'success');
+            closePaymentModal();
+        }
+        
+        // Close modal when clicking outside
+        document.getElementById('paymentModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePaymentModal();
+            }
+        });
+        
+        // Logout function
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('nulex_token');
+                localStorage.removeItem('nulex_user');
+                window.location.href = '/login';
+            }
+        }
+    </script>
+</body>
+</html>
