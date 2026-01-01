@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasks - NULEX</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .tasks-header {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+        
+        .task-filters {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: var(--white);
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+        
+        .filter-btn {
+            padding: 0.5rem 1.5rem;
+            border: 2px solid var(--light-blue);
+            background: white;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .filter-btn.active {
+            background: var(--primary-blue);
+            color: white;
+            border-color: var(--primary-blue);
+        }
+        
+        .filter-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .tasks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .task-card {
+            background: var(--white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .task-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .task-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .task-type {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .type-video { background: #dbeafe; color: #1e40af; }
+        .type-app { background: #fef3c7; color: #92400e; }
+        .type-survey { background: #d1fae5; color: #065f46; }
+        .type-social { background: #ede9fe; color: #5b21b6; }
+        .type-website { background: #fce7f3; color: #9d174d; }
+        
+        .task-body {
+            padding: 1.5rem;
+        }
+        
+        .task-reward {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--success);
+            margin: 1rem 0;
+        }
+        
+        .task-meta {
+            display: flex;
+            justify-content: space-between;
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .task-stats {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .stat-item {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .stat-value {
+            font-weight: bold;
+            color: var(--dark-blue);
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+        
+        .task-difficulty {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+        
+        .difficulty-easy { background: #d1fae5; color: #065f46; }
+        .difficulty-medium { background: #fef3c7; color: #92400e; }
+        .difficulty-hard { background: #fee2e2; color: #991b1b; }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+        
+        .page-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #e5e7eb;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .page-btn.active {
+            background: var(--primary-blue);
+            color: white;
+            border-color: var(--primary-blue);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--gray);
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--light-blue);
+        }
+        
+        .task-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        .task-modal-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .completion-steps {
+            counter-reset: step;
+            margin: 1.5rem 0;
+        }
+        
+        .completion-step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: var(--gray-light);
+            border-radius: 8px;
+        }
+        
+        .completion-step:before {
+            counter-increment: step;
+            content: counter(step);
+            width: 30px;
+            height: 30px;
+            background: var(--primary-blue);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-weight: bold;
+        }
+        
+        .screenshot-upload {
+            border: 2px dashed #e5e7eb;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            margin: 1rem 0;
+        }
+        
+        .screenshot-upload:hover {
+            border-color: var(--primary-blue);
+            background: var(--light-blue);
+        }
+        
+        .task-completion-timer {
+            text-align: center;
+            padding: 1rem;
+            background: var(--light-blue);
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        
+        .timer-display {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-blue);
+            margin: 0.5rem 0;
+        }
+        
+        @media (max-width: 768px) {
+            .tasks-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .task-filters {
+                flex-direction: column;
+            }
+            
+            .filter-btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo-container">
+            <img src="https://i.ibb.co/B9d2bfd/6-F10-C074-AF1-B-489-E-B18-F-FD5-FF1-C8-C402.jpg" alt="NULEX Logo" class="logo">
+            <h1 class="site-name">NULEX</h1>
+        </div>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <a href="/dashboard" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+            <button onclick="logout()" class="btn btn-secondary">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Tasks Header -->
+        <div class="tasks-header">
+            <h1 style="margin-bottom: 0.5rem;"><i class="fas fa-tasks"></i> Available Tasks</h1>
+            <p>Complete tasks to earn money. Each task has specific requirements and rewards.</p>
+            <div class="task-stats" style="margin-top: 1.5rem;">
+                <div class="stat-item">
+                    <div class="stat-value" id="availableTasks">24</div>
+                    <div class="stat-label">Available Tasks</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="completedTasks">8</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="totalEarned">₦12,500</div>
+                    <div class="stat-label">Total Earned</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="pendingTasks">3</div>
+                    <div class="stat-label">Pending Approval</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Task Filters -->
+        <div class="task-filters">
+            <button class="filter-btn active" onclick="filterTasks('all')">
+                <i class="fas fa-th-large"></i> All Tasks
+            </button>
+            <button class="filter-btn" onclick="filterTasks('video')">
+                <i class="fas fa-play-circle"></i> Video Tasks
+            </button>
+            <button class="filter-btn" onclick="filterTasks('app')">
+                <i class="fas fa-mobile-alt"></i> App Tasks
+            </button>
+            <button class="filter-btn" onclick="filterTasks('survey')">
+                <i class="fas fa-clipboard-list"></i> Surveys
+            </button>
+            <button class="filter-btn" onclick="filterTasks('social')">
+                <i class="fas fa-share-alt"></i> Social Media
+            </button>
+            <button class="filter-btn" onclick="filterTasks('website')">
+                <i class="fas fa-globe"></i> Website Visits
+            </button>
+            <div style="flex: 1;"></div>
+            <select class="form-input" style="max-width: 200px;" onchange="sortTasks(this.value)">
+                <option value="reward_high">Reward: High to Low</option>
+                <option value="reward_low">Reward: Low to High</option>
+                <option value="duration">Duration: Shortest First</option>
+                <option value="newest">Newest First</option>
+            </select>
+        </div>
+
+        <!-- Tasks Grid -->
+        <div id="tasksContainer">
+            <div class="tasks-grid" id="tasksGrid">
+                <!-- Tasks will be loaded here -->
+            </div>
+            
+            <!-- Pagination -->
+            <div class="pagination" id="pagination">
+                <!-- Pagination will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <i class="fas fa-tasks"></i>
+            <h3>No Tasks Available</h3>
+            <p>There are no tasks available in this category at the moment.</p>
+            <p>Check back later or try a different filter.</p>
+            <button class="btn btn-primary mt-2" onclick="filterTasks('all')">
+                <i class="fas fa-redo"></i> Show All Tasks
+            </button>
+        </div>
+
+        <!-- Task Completion Modal -->
+        <div id="taskModal" class="task-modal">
+            <div class="task-modal-content">
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2 id="modalTaskTitle">Task Title</h2>
+                    <button onclick="closeTaskModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">
+                        &times;
+                    </button>
+                </div>
+                
+                <div style="padding: 0 2rem 2rem 2rem;">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Task Requirements:</strong> Complete all steps below to earn your reward.
+                    </div>
+                    
+                    <div id="modalTaskDescription"></div>
+                    
+                    <div class="completion-steps" id="completionSteps">
+                        <!-- Steps will be loaded here -->
+                    </div>
+                    
+                    <!-- Screenshot Upload for Verification -->
+                    <div id="screenshotSection" style="display: none;">
+                        <h4><i class="fas fa-camera"></i> Proof of Completion</h4>
+                        <p>Upload screenshot as proof that you completed the task.</p>
+                        
+                        <div class="screenshot-upload" onclick="document.getElementById('screenshotInput').click()">
+                            <i class="fas fa-cloud-upload-alt fa-2x" style="color: var(--gray); margin-bottom: 1rem;"></i>
+                            <p>Click to upload screenshot</p>
+                            <small class="text-muted">Supported: JPG, PNG, GIF (Max 5MB)</small>
+                            <input type="file" id="screenshotInput" accept="image/*" style="display: none;" onchange="previewScreenshot(this)">
+                        </div>
+                        
+                        <div id="screenshotPreview" style="display: none; margin-top: 1rem;">
+                            <img id="previewImage" src="" alt="Screenshot Preview" style="max-width: 100%; border-radius: 8px;">
+                            <button onclick="removeScreenshot()" class="btn btn-danger btn-block mt-2">
+                                <i class="fas fa-trash"></i> Remove Screenshot
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Timer for Task Completion -->
+                    <div id="timerSection" class="task-completion-timer" style="display: none;">
+                        <h4><i class="fas fa-clock"></i> Task Timer</h4>
+                        <p>Remaining time to complete the task:</p>
+                        <div class="timer-display" id="taskTimer">05:00</div>
+                        <p>Task must be completed within this time limit.</p>
+                    </div>
+                    
+                    <!-- Question Answer for Verification -->
+                    <div id="questionSection" style="display: none;">
+                        <h4><i class="fas fa-question-circle"></i> Verification Question</h4>
+                        <p id="questionText">What color was the main button on the website?</p>
+                        <input type="text" id="answerInput" class="form-input" placeholder="Enter your answer">
+                    </div>
+                    
+                    <div class="alert alert-warning" id="taskRules">
+                        <!-- Task rules will be loaded here -->
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                        <button id="startTaskBtn" class="btn btn-primary" style="flex: 1;">
+                            <i class="fas fa-play"></i> Start Task
+                        </button>
+                        <button id="submitTaskBtn" class="btn btn-success" style="flex: 1; display: none;">
+                            <i class="fas fa-check"></i> Submit for Approval
+                        </button>
+                        <button onclick="closeTaskModal()" class="btn btn-secondary">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 NULEX Platform. All rights reserved.</p>
+        <p>Tasks are uploaded daily • Complete tasks to increase your earnings</p>
+    </footer>
+
+    <script src="/js/main.js"></script>
+    <script>
+        let currentTasks = [];
+        let currentFilter = 'all';
+        let currentPage = 1;
+        const tasksPerPage = 6;
+        let activeTaskId = null;
+        let taskTimer = null;
+        let timeRemaining = 0;
+        
+        // Check authentication
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!checkAuth()) {
+                window.location.href = '/login';
+                return;
+            }
+            
+            const user = JSON.parse(localStorage.getItem('nulex_user') || '{}');
+            if (!user.hasPackage) {
+                window.location.href = '/blocked-dashboard';
+                return;
+            }
+            
+            loadTasks();
+            updateTaskStats();
+        });
+        
+        // Load tasks from backend
+        async function loadTasks() {
+            try {
+                // Show loading state
+                document.getElementById('tasksGrid').innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+                        <div class="fa-spin" style="font-size: 2rem; color: var(--primary-blue); margin-bottom: 1rem;">
+                            <i class="fas fa-circle-notch"></i>
+                        </div>
+                        <p>Loading tasks...</p>
+                    </div>
+                `;
+                
+                // In real app, this would be an API call
+                // Simulate API delay
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Mock tasks data
+                currentTasks = [
+                    {
+                        id: 1,
+                        title: 'Watch Product Review Video',
+                        description: 'Watch this 3-minute product review video and answer a simple question about it.',
+                        reward: 500,
+                        type: 'video',
+                        duration: '3 minutes',
+                        difficulty: 'easy',
+                        requirements: 'Must watch entire video, no skipping',
+                        steps: ['Click the play button below', 'Watch the entire video', 'Answer the verification question'],
+                        videoUrl: 'https://example.com/video1',
+                        maxCompletions: 1000,
+                        currentCompletions: 842,
+                        requiresScreenshot: false,
+                        requiresQuestion: true,
+                        question: 'What was the main product feature mentioned?',
+                        createdAt: '2024-01-15'
+                    },
+                    {
+                        id: 2,
+                        title: 'Install & Review Mobile App',
+                        description: 'Install our mobile app from Play Store, use it for 5 minutes, and submit a screenshot of the home screen.',
+                        reward: 1200,
+                        type: 'app',
+                        duration: '10 minutes',
+                        difficulty: 'medium',
+                        requirements: 'Android device, internet connection',
+                        steps: ['Install the app from Google Play Store', 'Open the app and create an account', 'Use the app for 5 minutes', 'Take screenshot of home screen'],
+                        appUrl: 'https://play.google.com/store/apps/details?id=com.example.app',
+                        maxCompletions: 500,
+                        currentCompletions: 312,
+                        requiresScreenshot: true,
+                        requiresQuestion: false,
+                        createdAt: '2024-01-14'
+                    },
+                    {
+                        id: 3,
+                        title: 'Complete Shopping Habits Survey',
+                        description: 'Answer 15 questions about your online shopping habits. Your data will be used for market research.',
+                        reward: 800,
+                        type: 'survey',
+                        duration: '7 minutes',
+                        difficulty: 'easy',
+                        requirements: 'Must be 18+ years old',
+                        steps: ['Click the survey link', 'Answer all questions honestly', 'Submit the survey'],
+                        surveyUrl: 'https://example.com/survey1',
+                        maxCompletions: 2000,
+                        currentCompletions: 1542,
+                        requiresScreenshot: false,
+                        requiresQuestion: false,
+                        createdAt: '2024-01-13'
+                    },
+                    {
+                        id: 4,
+                        title: 'Follow Instagram Page',
+                        description: 'Follow our Instagram page and like the 3 most recent posts.',
+                        reward: 300,
+                        type: 'social',
+                        duration: '2 minutes',
+                        difficulty: 'easy',
+                        requirements: 'Instagram account',
+                        steps: ['Visit our Instagram page', 'Click Follow', 'Like the 3 most recent posts'],
+                        socialUrl: 'https://instagram.com/nulex_official',
+                        maxCompletions: 5000,
+                        currentCompletions: 4215,
+                        requiresScreenshot: true,
+                        requiresQuestion: false,
+                        createdAt: '2024-01-12'
+                    },
+                    {
+                        id: 5,
+                        title: 'Visit E-commerce Website',
+                        description: 'Visit our e-commerce website, browse for 3 minutes, and add any item to cart.',
+                        reward: 400,
+                        type: 'website',
+                        duration: '5 minutes',
+                        difficulty: 'easy',
+                        requirements: 'Desktop or mobile browser',
+                        steps: ['Click the website link', 'Browse products for 3 minutes', 'Add any item to cart'],
+                        websiteUrl: 'https://shop.example.com',
+                        maxCompletions: 3000,
+                        currentCompletions: 2310,
+                        requiresScreenshot: true,
+                        requiresQuestion: true,
+                        question: 'What was the price of the first product you saw?',
+                        createdAt: '2024-01-11'
+                    },
+                    {
+                        id: 6,
+                        title: 'Download & Test Game App',
+                        description: 'Download this mobile game, reach level 5, and submit screenshot of your score.',
+                        reward: 1500,
+                        type: 'app',
+                        duration: '15 minutes',
+                        difficulty: 'hard',
+                        requirements: 'Android/iOS device, 500MB storage',
+                        steps: ['Download the game from app store', 'Install and open the game', 'Play until you reach level 5', 'Take screenshot of your score'],
+                        appUrl: 'https://play.google.com/store/apps/details?id=com.example.game',
+                        maxCompletions: 200,
+                        currentCompletions: 89,
+                        requiresScreenshot: true,
+                        requiresQuestion: false,
+                        createdAt: '2024-01-10'
+                    }
+                ];
+                
+                displayTasks();
+                
+            } catch (error) {
+                console.error('Error loading tasks:', error);
+                document.getElementById('tasksGrid').innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+                        <i class="fas fa-exclamation-triangle fa-2x" style="color: var(--danger); margin-bottom: 1rem;"></i>
+                        <p>Failed to load tasks. Please try again.</p>
+                        <button class="btn btn-primary" onclick="loadTasks()">
+                            <i class="fas fa-redo"></i> Retry
+                        </button>
+                    </div>
+                `;
+            }
+        }
+        
+        function displayTasks() {
+            const filteredTasks = filterTaskList(currentTasks, currentFilter);
+            const paginatedTasks = paginateTasks(filteredTasks, currentPage, tasksPerPage);
+            
+            if (paginatedTasks.tasks.length === 0) {
+                document.getElementById('tasksContainer').style.display = 'none';
+                document.getElementById('emptyState').style.display = 'block';
+                return;
+            }
+            
+            document.getElementById('tasksContainer').style.display = 'block';
+            document.getElementById('emptyState').style.display = 'none';
+            
+            // Render tasks
+            const tasksHtml = paginatedTasks.tasks.map(task => `
+                <div class="task-card">
+                    <div class="task-header">
+                        <div>
+                            <span class="task-type type-${task.type}">
+                                <i class="fas fa-${getTaskIcon(task.type)}"></i> ${getTaskTypeName(task.type)}
+                            </span>
+                            <span class="task-difficulty difficulty-${task.difficulty}">
+                                ${task.difficulty.charAt(0).toUpperCase() + task.difficulty.slice(1)}
+                            </span>
+                        </div>
+                        <div style="font-weight: bold; color: var(--gray);">
+                            #${task.id}
+                        </div>
+                    </div>
+                    
+                    <div class="task-body">
+                        <h3 style="margin-bottom: 0.5rem;">${task.title}</h3>
+                        <p style="color: var(--gray); margin-bottom: 1rem; font-size: 0.95rem;">
+                            ${task.description}
+                        </p>
+                        
+                        <div class="task-reward">
+                            ₦${task.reward.toLocaleString()}
+                        </div>
+                        
+                        <div class="task-meta">
+                            <div>
+                                <i class="fas fa-clock"></i> ${task.duration}
+                            </div>
+                            <div>
+                                <i class="fas fa-users"></i> ${task.currentCompletions}/${task.maxCompletions}
+                            </div>
+                        </div>
+                        
+                        <div class="task-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">${getSuccessRate(task)}%</div>
+                                <div class="stat-label">Success Rate</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">${getTimeLeft(task)}</div>
+                                <div class="stat-label">Time Left</div>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary btn-block mt-3" onclick="viewTask(${task.id})">
+                            <i class="fas fa-eye"></i> View Task Details
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('tasksGrid').innerHTML = tasksHtml;
+            
+            // Render pagination
+            renderPagination(paginatedTasks.totalPages);
+            
+            // Update task stats
+            updateTaskStats(filteredTasks);
+        }
+        
+        function filterTasks(filter) {
+            currentFilter = filter;
+            currentPage = 1;
+            
+            // Update active filter button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            displayTasks();
+        }
+        
+        function sortTasks(sortBy) {
+            switch(sortBy) {
+                case 'reward_high':
+                    currentTasks.sort((a, b) => b.reward - a.reward);
+                    break;
+                case 'reward_low':
+                    currentTasks.sort((a, b) => a.reward - b.reward);
+                    break;
+                case 'duration':
+                    // Extract minutes from duration string
+                    currentTasks.sort((a, b) => {
+                        const aMinutes = parseInt(a.duration);
+                        const bMinutes = parseInt(b.duration);
+                        return aMinutes - bMinutes;
+                    });
+                    break;
+                case 'newest':
+                    currentTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    break;
+            }
+            
+            displayTasks();
+        }
+        
+        function filterTaskList(tasks, filter) {
+            if (filter === 'all') return tasks;
+            return tasks.filter(task => task.type === filter);
+        }
+        
+        function paginateTasks(tasks, page, perPage) {
+            const start = (page - 1) * perPage;
+            const end = start + perPage;
+            const paginatedTasks = tasks.slice(start, end);
+            const totalPages = Math.ceil(tasks.length / perPage);
+            
+            return {
+                tasks: paginatedTasks,
+                totalPages: totalPages
+            };
+        }
+        
+        function renderPagination(totalPages) {
+            if (totalPages <= 1) {
+                document.getElementById('pagination').innerHTML = '';
+                return;
+            }
+            
+            let paginationHtml = '';
+            
+            // Previous button
+            if (currentPage > 1) {
+                paginationHtml += `<button class="page-btn" onclick="goToPage(${currentPage - 1})">&laquo; Previous</button>`;
+            }
+            
+            // Page numbers
+            const maxVisible = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+            
+            if (endPage - startPage + 1 < maxVisible) {
+                startPage = Math.max(1, endPage - maxVisible + 1);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHtml += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+            }
+            
+            // Next button
+            if (currentPage < totalPages) {
+                paginationHtml += `<button class="page-btn" onclick="goToPage(${currentPage + 1})">Next &raquo;</button>`;
+            }
+            
+            document.getElementById('pagination').innerHTML = paginationHtml;
+        }
+        
+        function goToPage(page) {
+            currentPage = page;
+            displayTasks();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        function getTaskIcon(type) {
+            const icons = {
+                'video': 'play-circle',
+                'app': 'mobile-alt',
+                'survey': 'clipboard-list',
+                'social': 'share-alt',
+                'website': 'globe'
+            };
+            return icons[type] || 'tasks';
+        }
+        
+        function getTaskTypeName(type) {
+            const names = {
+                'video': 'Video',
+                'app': 'App',
+                'survey': 'Survey',
+                'social': 'Social Media',
+                'website': 'Website'
+            };
+            return names[type] || 'Task';
+        }
+        
+        function getSuccessRate(task) {
+            const rate = (task.currentCompletions / task.maxCompletions) * 100;
+            return Math.min(100, Math.round(rate));
+        }
+        
+        function getTimeLeft(task) {
+            const completionsLeft = task.maxCompletions - task.currentCompletions;
+            if (completionsLeft < 50) return 'Almost Full';
+            if (completionsLeft < 200) return 'Limited';
+            return 'Available';
+        }
+        
+        function updateTaskStats(tasks = currentTasks) {
+            const completedTasks = 8; // In real app, this would come from user data
+            const totalEarned = 12500; // In real app, this would come from user data
+            const pendingTasks = 3; // In real app, this would come from user data
+            
+            document.getElementById('availableTasks').textContent = tasks.length;
+            document.getElementById('completedTasks').textContent = completedTasks;
+            document.getElementById('totalEarned').textContent = `₦${totalEarned.toLocaleString()}`;
+            document.getElementById('pendingTasks').textContent = pendingTasks;
+        }
+        
+        function viewTask(taskId) {
+            const task = currentTasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            activeTaskId = taskId;
+            
+            // Update modal content
+            document.getElementById('modalTaskTitle').textContent = task.title;
+            document.getElementById('modalTaskDescription').innerHTML = `
+                <p>${task.description}</p>
+                <div class="alert alert-success">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <strong>Reward:</strong> ₦${task.reward.toLocaleString()}
+                </div>
+                <div class="alert alert-info">
+                    <i class="fas fa-clock"></i>
+                    <strong>Estimated Duration:</strong> ${task.duration}
+                </div>
+            `;
+            
+            // Update completion steps
+            const stepsHtml = task.steps.map((step, index) => `
+                <div class="completion-step">
+                    ${step}
+                </div>
+            `).join('');
+            document.getElementById('completionSteps').innerHTML = stepsHtml;
+            
+            // Update task rules
+            document.getElementById('taskRules').innerHTML = `
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Important Rules:</strong>
+                <ul style="margin: 0.5rem 0 0 1rem;">
+                    <li>${task.requirements}</li>
+                    <li>Do not use fake screenshots or automated tools</li>
+                    <li>Task must be completed within 24 hours of starting</li>
+                    <li>Violations may result in account suspension</li>
+                </ul>
+            `;
+            
+            // Show/hide sections based on task requirements
+            document.getElementById('screenshotSection').style.display = task.requiresScreenshot ? 'block' : 'none';
+            document.getElementById('questionSection').style.display = task.requiresQuestion ? 'block' : 'none';
+            
+            if (task.requiresQuestion) {
+                document.getElementById('questionText').textContent = task.question;
+            }
+            
+            // Reset buttons
+            document.getElementById('startTaskBtn').style.display = 'block';
+            document.getElementById('submitTaskBtn').style.display = 'none';
+            document.getElementById('timerSection').style.display = 'none';
+            
+            // Set timer duration based on task duration
+            const durationMinutes = parseInt(task.duration);
+            timeRemaining = durationMinutes * 60;
+            
+            // Clear any existing timer
+            if (taskTimer) {
+                clearInterval(taskTimer);
+            }
+            
+            // Clear screenshot preview
+            document.getElementById('screenshotPreview').style.display = 'none';
+            document.getElementById('screenshotInput').value = '';
+            
+            // Open modal
+            document.getElementById('taskModal').style.display = 'flex';
+        }
+        
+        function closeTaskModal() {
+            document.getElementById('taskModal').style.display = 'none';
+            
+            // Clear timer
+            if (taskTimer) {
+                clearInterval(taskTimer);
+                taskTimer = null;
+            }
+            
+            // Reset active task
+            activeTaskId = null;
+        }
+        
+        function startTask() {
+            const task = currentTasks.find(t => t.id === activeTaskId);
+            if (!task) return;
+            
+            // Hide start button, show submit button
+            document.getElementById('startTaskBtn').style.display = 'none';
+            document.getElementById('submitTaskBtn').style.display = 'block';
+            
+            // Show timer for timed tasks
+            if (parseInt(task.duration) > 0) {
+                document.getElementById('timerSection').style.display = 'block';
+                startTaskTimer();
+            }
+            
+            // Open task URL in new tab if applicable
+            let taskUrl = '';
+            switch(task.type) {
+                case 'video':
+                    taskUrl = task.videoUrl;
+                    break;
+                case 'app':
+                    taskUrl = task.appUrl;
+                    break;
+                case 'survey':
+                    taskUrl = task.surveyUrl;
+                    break;
+                case 'social':
+                    taskUrl = task.socialUrl;
+                    break;
+                case 'website':
+                    taskUrl = task.websiteUrl;
+                    break;
+            }
+            
+            if (taskUrl) {
+                window.open(taskUrl, '_blank');
+                showAlert('Task opened in new tab. Complete the task and return here to submit proof.', 'info');
+            } else {
+                showAlert('Task started! Complete the requirements and submit proof.', 'info');
+            }
+        }
+        
+        function startTaskTimer() {
+            updateTimerDisplay();
+            
+            taskTimer = setInterval(() => {
+                timeRemaining--;
+                updateTimerDisplay();
+                
+                if (timeRemaining <= 0) {
+                    clearInterval(taskTimer);
+                    showAlert('Time is up! Please submit your task completion now.', 'warning');
+                }
+            }, 1000);
+        }
+        
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            document.getElementById('taskTimer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        function previewScreenshot(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    document.getElementById('previewImage').src = e.target.result;
+                    document.getElementById('screenshotPreview').style.display = 'block';
+                };
+                
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        
+        function removeScreenshot() {
+            document.getElementById('screenshotInput').value = '';
+            document.getElementById('screenshotPreview').style.display = 'none';
+            document.getElementById('previewImage').src = '';
+        }
+        
+        async function submitTask() {
+            const task = currentTasks.find(t => t.id === activeTaskId);
+            if (!task) return;
+            
+            // Validate submission
+            if (task.requiresScreenshot && !document.getElementById('screenshotInput').files[0]) {
+                showAlert('Please upload a screenshot as proof of completion', 'danger');
+                return;
+            }
+            
+            if (task.requiresQuestion) {
+                const answer = document.getElementById('answerInput').value.trim();
+                if (!answer) {
+                    showAlert('Please answer the verification question', 'danger');
+                    return;
+                }
+            }
+            
+            // Show loading state
+            const submitBtn = document.getElementById('submitTaskBtn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+            submitBtn.disabled = true;
+            
+            try {
+                // In real app, this would be an API call
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                showAlert('Task submitted successfully! Awaiting admin approval.', 'success');
+                
+                // Close modal after delay
+                setTimeout(() => {
+                    closeTaskModal();
+                    
+                    // Update task stats
+                    const newCompleted = parseInt(document.getElementById('completedTasks').textContent) + 1;
+                    const newEarned = parseInt(document.getElementById('totalEarned').textContent.replace(/[^0-9]/g, '')) + task.reward;
+                    const newPending = parseInt(document.getElementById('pendingTasks').textContent) + 1;
+                    
+                    document.getElementById('completedTasks').textContent = newCompleted;
+                    document.getElementById('totalEarned').textContent = `₦${newEarned.toLocaleString()}`;
+                    document.getElementById('pendingTasks').textContent = newPending;
+                    
+                    // Remove task from available list
+                    currentTasks = currentTasks.filter(t => t.id !== activeTaskId);
+                    displayTasks();
+                    
+                }, 1500);
+                
+            } catch (error) {
+                showAlert('Failed to submit task. Please try again.', 'danger');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+        
+        // Attach submit function to button
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('submitTaskBtn').addEventListener('click', submitTask);
+            document.getElementById('startTaskBtn').addEventListener('click', startTask);
+        });
+        
+        // Close modal when clicking outside
+        document.getElementById('taskModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeTaskModal();
+            }
+        });
+        
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('nulex_token');
+                localStorage.removeItem('nulex_user');
+                window.location.href = '/login';
+            }
+        }
+    </script>
+</body>
+</html>
