@@ -247,22 +247,30 @@
         }
         
         function showKorapayPayment() {
-            document.getElementById('paymentDetails').innerHTML = `
-                <div class="form-group">
-                    <label class="form-label">Redirecting to Korapay...</label>
-                    <p>You will be redirected to Korapay's secure payment page to complete your transaction.</p>
-                    <div style="text-align: center; padding: 2rem;">
-                        <div class="fa-spin" style="font-size: 3rem; color: var(--primary-blue); margin-bottom: 1rem;">
-                            <i class="fas fa-circle-notch"></i>
-                        </div>
-                        <p>Preparing secure payment gateway...</p>
-                    </div>
-                </div>
-                <button type="button" onclick="simulatePayment()" class="btn btn-success btn-block">
-                    <i class="fas fa-lock"></i> Simulate Payment (Demo)
-                </button>
-            `;
-        }
+    document.getElementById('paymentDetails').innerHTML = `
+        <div class="form-group">
+            <label class="form-label">Korapay Secure Payment</label>
+            <p>You will be redirected to Korapay's secure payment page to complete your transaction.</p>
+            <div class="alert alert-info">
+                <i class="fas fa-shield-alt"></i>
+                <strong>Secure Payment:</strong> Your card details are never stored on our servers.
+            </div>
+        </div>
+        <button type="button" onclick="processRealPayment('${selectedPackage}')" class="btn btn-success btn-block">
+            <i class="fas fa-lock"></i> Proceed to Secure Payment
+        </button>
+        
+        <!-- Demo button for testing -->
+        ${process.env.NODE_ENV === 'development' ? `
+        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed #ccc;">
+            <small class="text-muted">Development Mode</small>
+            <button type="button" onclick="simulatePayment()" class="btn btn-secondary btn-block mt-2">
+                <i class="fas fa-code"></i> Simulate Payment (Dev Only)
+            </button>
+        </div>
+        ` : ''}
+    `;
+}
         
         function showBankTransfer() {
             document.getElementById('paymentDetails').innerHTML = `
